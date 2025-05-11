@@ -1,24 +1,51 @@
 {
-  "name": "Darakwon Attendance",
-  "short_name": "다락원 근태앱",
-  "description": "다락원 근태기록 앱",
-  "start_url": "/drwAtt/",
+  "name": "다락원 간편 출퇴근 기록 관리 앱",
+  "short_name": "다락원 출퇴근",
+  "description": "다락원 간편 출퇴근 기록 관리 앱",
+  "start_url": "/drwAtt/index.html",
+  "scope": "/drwAtt/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#4a4a4a",
-  "orientation": "portrait",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "/drwAtt/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/drwAtt/icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
+  "orientation": "portrait",
+  "prefer_related_applications": false,
+  "shortcuts": [
+    {
+      "name": "출근하기",
+      "short_name": "출근",
+      "description": "출근 시간 기록",
+      "url": "/drwAtt/index.html?action=checkIn",
+      "icons": [{ "src": "/drwAtt/icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "퇴근하기",
+      "short_name": "퇴근",
+      "description": "퇴근 시간 기록",
+      "url": "/drwAtt/index.html?action=checkOut",
+      "icons": [{ "src": "/drwAtt/icon.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "lang": "ko-KR",
+  "dir": "ltr",
   "screenshots": [
     {
-      "src": "og_image.png",
-      "sizes": "1200x630",
+      "src": "/drwAtt/icon.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]
