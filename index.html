@@ -10,14 +10,14 @@
     <meta name="application-name" content="Darakwon Attendance">
     
     <!-- PWA 관련 메타태그 및 링크 -->
-    <link rel="manifest" href="/drwAtt/manifest.json">
-    <link rel="icon" href="/drwAtt/icon.png">
-    <link rel="apple-touch-icon" href="/drwAtt/icon.png">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" href="./icon.png">
+    <link rel="apple-touch-icon" href="./icon.png">
     
     <!-- 오픈그래프 메타태그 -->
     <meta property="og:title" content="Darakwon Attendance - 간편한 출퇴근 기록 관리 앱">
     <meta property="og:description" content="다락원 근태기록 앱">
-    <meta property="og:image" content="/drwAtt/og_image.png">
+    <meta property="og:image" content="./og_image.png">
     <meta property="og:url" content="https://ninanomambo.github.io/drwAtt/">
     <meta property="og:type" content="website">
     
@@ -25,7 +25,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Darakwon Attendance - 간편한 출퇴근 기록 관리 앱">
     <meta name="twitter:description" content="다락원 근태기록 앱">
-    <meta name="twitter:image" content="og_image.png">
+    <meta name="twitter:image" content="./og_image.png">
     
     <title>Darakwon Attendance Ver 0.1</title>
     <style>
@@ -533,6 +533,16 @@
             margin-bottom: 10px;
         }
         
+        /* 디버그 정보 */
+        .debug-info {
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+        
         @media (max-width: 380px) {
             .btn {
                 padding: 20px 10px;
@@ -626,6 +636,12 @@
             </div>
             
             <div class="current-time" id="currentTime"></div>
+            
+            <!-- 디버그 정보 (개발 중에만 표시, 배포 시 삭제) -->
+            <div class="debug-info" id="debugInfo">
+                현재 날짜: <span id="debugDate"></span><br>
+                날짜 키: <span id="debugDateKey"></span>
+            </div>
         </div>
     </div>
     
@@ -731,10 +747,15 @@
             const configCancelBtn = document.getElementById('configCancelBtn');
             const googleStatus = document.getElementById('googleStatus');
             
+            // 디버그 요소
+            const debugInfo = document.getElementById('debugInfo');
+            const debugDate = document.getElementById('debugDate');
+            const debugDateKey = document.getElementById('debugDateKey');
+            
             // 서비스 워커 등록
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/drwAtt/sw.js')
+                    navigator.serviceWorker.register('./sw.js')
                         .then(registration => {
                             console.log('서비스 워커 등록 성공:', registration.scope);
                         })
@@ -837,6 +858,9 @@
                 
                 // Google API 로드 및 초기화
                 init: function() {
+                    if (!this.API_KEY || !this.CLIENT_ID) {
+                        googleStatus.textContent = '구글 드라이브 연동 상태: API 키 및 클라이언트 ID 설정 필요';
+                        return Promise.reject(new Error('APIinit: function() {
                     if (!this.API_KEY || !this.CLIENT_ID) {
                         googleStatus.textContent = '구글 드라이브 연동 상태: API 키 및 클라이언트 ID 설정 필요';
                         return Promise.reject(new Error('API 키 및 클라이언트 ID가 설정되지 않았습니다.'));
@@ -1277,11 +1301,29 @@
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 const seconds = String(now.getSeconds()).padStart(2, '0');
                 currentTimeElem.textContent = `현재 시간: ${hours}:${minutes}:${seconds}`;
+                
+                // 디버그 정보 업데이트
+                updateDebugInfo();
+            }
+            
+            // 디버그 정보 업데이트 함수
+            function updateDebugInfo() {
+                const now = new Date();
+                debugDate.textContent = now.toLocaleString();
+                debugDateKey.textContent = getDateKey(now);
             }
             
             // 1초마다 현재 시간 업데이트
             setInterval(updateCurrentTime, 1000);
             updateCurrentTime();
+            
+            // 로컬 기준 날짜 키 생성 함수 (YYYY-MM-DD)
+            function getDateKey(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');  // 월은 0부터 시작하므로 +1
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
             
             // 날짜 형식 변환 함수
             function formatDate(date) {
@@ -1319,25 +1361,20 @@
                 await StorageManager.setItem('attendanceData', JSON.stringify(data));
             }
             
-
-            // 출근 버튼 클릭 이벤트 수정
+            // 출근 버튼 클릭 이벤트 (날짜 계산 수정)
             clockInBtn.addEventListener('click', async function() {
                 vibrate(this);
                 
                 // 현재 날짜와 시간 가져오기
                 const now = new Date();
                 
-                // ISO 형식의 현재 날짜를 YYYY-MM-DD 형태로 변환
-                // toISOString()은 UTC 기준으로 변환되므로 로컬 날짜를 사용하도록 수정
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const dateKey = `${year}-${month}-${day}`;
+                // 로컬 시간 기준으로 날짜 키 생성 (YYYY-MM-DD)
+                const dateKey = getDateKey(now);
                 
-                // 로그 추가 (디버깅용, 실제 사용시 제거 가능)
-                console.log('현재 날짜 키:', dateKey);
-                console.log('현재 시간:', now.toLocaleString());
+                console.log('출근 버튼 클릭 - 현재 날짜:', now.toLocaleString());
+                console.log('생성된 날짜 키:', dateKey);
                 
+                // 데이터 가져오기
                 const attendanceData = await getAttendanceData();
                 
                 // 이미 출근 기록이 있으면 업데이트하지 않음
@@ -1353,26 +1390,25 @@
                 
                 // 2주가 지난 데이터 삭제
                 await cleanupOldData();
+                
+                // 디버그 정보 업데이트
+                updateDebugInfo();
             });
-
-            // 퇴근 버튼 클릭 이벤트 수정
+            
+            // 퇴근 버튼 클릭 이벤트 (날짜 계산 수정)
             clockOutBtn.addEventListener('click', async function() {
                 vibrate(this);
                 
                 // 현재 날짜와 시간 가져오기
                 const now = new Date();
                 
-                // ISO 형식의 현재 날짜를 YYYY-MM-DD 형태로 변환
-                // toISOString()은 UTC 기준으로 변환되므로 로컬 날짜를 사용하도록 수정
-                const year = now.getFullYear();
-                const month = String(now.getMonth() + 1).padStart(2, '0');
-                const day = String(now.getDate()).padStart(2, '0');
-                const dateKey = `${year}-${month}-${day}`;
+                // 로컬 시간 기준으로 날짜 키 생성 (YYYY-MM-DD)
+                const dateKey = getDateKey(now);
                 
-                // 로그 추가 (디버깅용, 실제 사용시 제거 가능)
-                console.log('현재 날짜 키:', dateKey);
-                console.log('현재 시간:', now.toLocaleString());
+                console.log('퇴근 버튼 클릭 - 현재 날짜:', now.toLocaleString());
+                console.log('생성된 날짜 키:', dateKey);
                 
+                // 데이터 가져오기
                 const attendanceData = await getAttendanceData();
                 
                 if (!attendanceData[dateKey]) {
@@ -1388,32 +1424,32 @@
                 
                 // 2주가 지난 데이터 삭제
                 await cleanupOldData();
+                
+                // 디버그 정보 업데이트
+                updateDebugInfo();
             });
             
-            // 날짜 키 생성 함수 (재사용을 위해 별도 함수로 분리 - 선택사항)
-            function getDateKey(date) {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const day = String(date.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-
-
-            // 2주 이상 지난 데이터 삭제 함수도 동일한 방식으로 수정
+            // 2주 이상 지난 데이터 삭제 (날짜 비교 수정)
             async function cleanupOldData() {
                 const attendanceData = await getAttendanceData();
-                const twoWeeksAgo = new Date();
-                twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+                const now = new Date();
+                const twoWeeksAgo = new Date(now);
+                twoWeeksAgo.setDate(now.getDate() - 14);
                 twoWeeksAgo.setHours(0, 0, 0, 0);
+                
+                console.log('데이터 정리 - 기준 날짜:', twoWeeksAgo.toLocaleString());
                 
                 let hasChanges = false;
                 
                 for (const dateKey in attendanceData) {
-                    // 날짜 문자열 파싱 시 로컬 시간대로 변환
+                    // 날짜 키에서 년, 월, 일 파싱 (YYYY-MM-DD)
                     const [year, month, day] = dateKey.split('-').map(num => parseInt(num, 10));
-                    const recordDate = new Date(year, month - 1, day);  // month는 0부터 시작하므로 -1 처리
+                    
+                    // 로컬 날짜 객체 생성 (월은 0부터 시작하므로 -1)
+                    const recordDate = new Date(year, month - 1, day);
                     
                     if (recordDate < twoWeeksAgo) {
+                        console.log('오래된 데이터 삭제:', dateKey, recordDate.toLocaleString());
                         delete attendanceData[dateKey];
                         hasChanges = true;
                     }
@@ -1421,7 +1457,9 @@
                 
                 if (hasChanges) {
                     await saveAttendanceData(attendanceData);
+                    console.log('오래된 데이터 정리 완료');
                 }
+            }
             
             // 근무 시간 계산 (점심 시간 제외, 11시간 초과 시 저녁 시간 제외)
             function calculateWorkHours(clockIn, clockOut) {
@@ -1435,8 +1473,8 @@
                 
                 // 점심 시간 계산 (11:30 ~ 12:00)
                 const inDate = new Date(inTime);
-                const lunchStart = new Date(inDate.setHours(11, 30, 0, 0));
-                const lunchEnd = new Date(inDate.setHours(12, 0, 0, 0));
+                const lunchStart = new Date(inDate.getFullYear(), inDate.getMonth(), inDate.getDate(), 11, 30, 0);
+                const lunchEnd = new Date(inDate.getFullYear(), inDate.getMonth(), inDate.getDate(), 12, 0, 0);
                 
                 // 점심 시간이 근무 시간에 포함되어 있는지 확인
                 if (inTime <= lunchEnd && outTime >= lunchStart) {
@@ -1482,23 +1520,29 @@
                 }
             });
             
-            // 터치 이벤트 취소 (스와이프 방지)
+ // 터치 이벤트 취소 (스와이프 방지)
             overlay.addEventListener('touchmove', function(e) {
                 e.stopPropagation();
             }, { passive: false });
             
-            // 출근부 렌더링
+            // 출근부 렌더링 - 수정된 버전 (로컬 날짜 기준)
             async function renderAttendanceSheet() {
                 try {
                     const attendanceData = await getAttendanceData();
+                    
+                    // 현재 로컬 날짜
                     const today = new Date();
+                    
+                    console.log('출근부 렌더링 - 현재 날짜:', today.toLocaleString());
                     
                     // 이번 주 시작일 (일요일)
                     const currentWeekStart = getWeekStart(today);
+                    console.log('이번 주 시작일:', currentWeekStart.toLocaleString());
                     
                     // 지난 주 시작일 (이번주 시작일 - 7일)
                     const lastWeekStart = new Date(currentWeekStart);
                     lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+                    console.log('지난 주 시작일:', lastWeekStart.toLocaleString());
                     
                     // 이번 주 데이터 렌더링
                     renderWeekData(currentWeekStart, 'currentWeekBody', 'currentWeekTotal', attendanceData);
@@ -1511,7 +1555,7 @@
                 }
             }
             
-            // 주간 데이터 렌더링
+            // 주간 데이터 렌더링 - 수정된 버전 (로컬 날짜 기준)
             function renderWeekData(weekStart, tableBodyId, totalId, attendanceData) {
                 const tableBody = document.getElementById(tableBodyId);
                 tableBody.innerHTML = '';
@@ -1523,7 +1567,11 @@
                     const date = new Date(weekStart);
                     date.setDate(date.getDate() + i);
                     
-                    const dateKey = date.toISOString().split('T')[0];
+                    // 로컬 날짜 기준으로 dateKey 생성
+                    const dateKey = getDateKey(date);
+                    
+                    console.log(`요일 ${i} 렌더링:`, date.toLocaleString(), '- 날짜 키:', dateKey);
+                    
                     const dayRecord = attendanceData[dateKey] || {};
                     
                     const row = document.createElement('tr');
@@ -1779,7 +1827,10 @@
                 }, 500);
                 
                 // 초기화 시 오래된 데이터 정리
-                cleanupOldData();
+                await cleanupOldData();
+                
+                // 디버그 정보 업데이트
+                updateDebugInfo();
             }
             
             // 앱 초기화
