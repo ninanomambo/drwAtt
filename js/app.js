@@ -27,6 +27,9 @@
                 await GoogleAPI.init(authData);
             }
             
+            // URL 파라미터 확인 (바로가기를 통한 접근인 경우)
+            checkUrlParameters();
+            
             // 앱 준비 완료 메시지
             UI.showToast('앱이 준비되었습니다.');
             
@@ -36,6 +39,32 @@
             UI.showToast('앱 초기화 중 오류가 발생했습니다.');
             return false;
         }
+    };
+    
+    /**
+     * URL 파라미터 확인 및 처리
+     */
+    const checkUrlParameters = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const action = urlParams.get('action');
+        
+        // 파라미터가 없으면 처리하지 않음
+        if (!action) return;
+        
+        // 파라미터에 따른 동작
+        switch (action) {
+            case 'checkIn':
+                // 출근 버튼 자동 클릭하지 않고 단순히 앱 열기
+                break;
+            case 'checkOut':
+                // 퇴근 버튼 자동 클릭하지 않고 단순히 앱 열기
+                break;
+            default:
+                break;
+        }
+        
+        // 파라미터 처리 후 URL 깨끗하게 정리
+        window.history.replaceState({}, document.title, window.location.pathname);
     };
     
     /**

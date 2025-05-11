@@ -475,6 +475,7 @@ const UI = (() => {
      * @param {string} contentType - 파일 MIME 타입
      */
     const downloadFile = (content, fileName, contentType) => {
+        // 백업 버튼을 통해 명시적으로 호출된 경우에만 다운로드 실행
         const a = document.createElement('a');
         const file = new Blob([content], { type: contentType });
         
@@ -482,7 +483,10 @@ const UI = (() => {
         a.download = fileName;
         a.click();
         
-        URL.revokeObjectURL(a.href);
+        // 메모리 해제
+        setTimeout(() => {
+            URL.revokeObjectURL(a.href);
+        }, 100);
     };
     
     /**
@@ -590,14 +594,19 @@ const UI = (() => {
                 checkOutDisplayTime: displayString
             };
             
-            await DB.saveData(dateString, data);
-            
-            // 데이터 정리
-            await DB.cleanOldData();
-            
-            // 애니메이션 및 알림
-            animateCheckOutButton();
-            showToast('퇴근 시간이 기록되었습니다: ' + displayString);
+            try {
+                await DB.saveData(dateString, data);
+                
+                // 데이터 정리
+                await DB.cleanOldData();
+                
+                // 애니메이션 및 알림
+                animateCheckOutButton();
+                showToast('퇴근 시간이 기록되었습니다: ' + displayString);
+            } catch (error) {
+                console.error('퇴근 시간 저장 오류:', error);
+                showToast('퇴근 시간 저장 중 오류가 발생했습니다.');
+            }
         });
         
         // 출근부 버튼 클릭
