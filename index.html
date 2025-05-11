@@ -41,7 +41,7 @@
             background-color: #f7f7f7;
             height: 100vh;
             width: 100%;
-            overflow-x: hidden; 
+            overflow-x: hidden;
             position: fixed;
         }
         
@@ -160,8 +160,9 @@
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             width: 100%;
+            flex-wrap: wrap; /* 버튼이 많아질 경우 자동 줄바꿈 */
         }
         
         .data-btn {
@@ -177,7 +178,8 @@
             align-items: center;
             justify-content: center;
             flex: 1;
-            max-width: 90px;
+            min-width: 90px;
+            max-width: 140px;
         }
         
         .data-btn:active {
@@ -213,6 +215,13 @@
             background-color: #F44336;
         }
         
+        .sync-status {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0;
+        }
+        
         .current-time {
             text-align: center;
             font-size: 14px;
@@ -246,6 +255,80 @@
             overflow-y: auto;
             margin: 20px auto;
             -webkit-overflow-scrolling: touch;
+        }
+        
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        
+        .modal-content {
+            background-color: white;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .form-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .modal-btn-cancel {
+            background-color: #f2f2f2;
+            color: #555;
+        }
+        
+        .modal-btn-save {
+            background-color: #4a4a4a;
+            color: white;
         }
         
         .sheet-header {
@@ -436,6 +519,20 @@
             cursor: pointer;
         }
         
+        /* 구글 드라이브 통합 스타일 */
+        .google-section {
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        
+        .google-title {
+            font-size: 14px;
+            color: #555;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
         @media (max-width: 380px) {
             .btn {
                 padding: 20px 10px;
@@ -457,6 +554,11 @@
             
             .sheet-title {
                 font-size: 16px;
+            }
+            
+            .data-btn {
+                font-size: 12px;
+                padding: 8px 12px;
             }
         }
     </style>
@@ -497,6 +599,26 @@
                 </button>
                 <input type="file" id="restoreInput" accept=".json" style="display: none;">
             </div>
+            
+            <div class="google-section">
+                <div class="google-title">구글 드라이브 연동</div>
+                <div class="data-management">
+                    <button class="data-btn" id="googleConfigBtn">
+                        <span class="data-btn-icon">⚙️</span>
+                        Google 정보저장
+                    </button>
+                    <button class="data-btn" id="googleBackupBtn">
+                        <span class="data-btn-icon">☁️</span>
+                        Google 백업
+                    </button>
+                    <button class="data-btn" id="googleRestoreBtn">
+                        <span class="data-btn-icon">📥</span>
+                        Google 복원
+                    </button>
+                </div>
+            </div>
+            
+            <div class="sync-status" id="googleStatus">구글 드라이브 연동 상태: 설정 필요</div>
             
             <div class="status-indicator">
                 <span class="status-dot" id="storageStatus"></span>
@@ -556,6 +678,25 @@
         </div>
     </div>
     
+    <!-- 구글 API 정보 입력 모달 -->
+    <div class="modal" id="googleConfigModal">
+        <div class="modal-content">
+            <div class="modal-title">구글 드라이브 API 설정</div>
+            <div class="form-group">
+                <label for="apiKey">API Key</label>
+                <input type="text" id="apiKey" placeholder="Google Cloud Console에서 생성한 API Key">
+            </div>
+            <div class="form-group">
+                <label for="clientId">Client ID</label>
+                <input type="text" id="clientId" placeholder="Google Cloud Console에서 생성한 Client ID">
+            </div>
+            <div class="form-buttons">
+                <button class="modal-btn modal-btn-cancel" id="configCancelBtn">취소</button>
+                <button class="modal-btn modal-btn-save" id="configSaveBtn">저장</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- PWA 설치 알림 배너 -->
     <div class="install-banner" id="installBanner">
         <div class="install-text">홈 화면에 추가하여 앱처럼 사용하세요!</div>
@@ -580,6 +721,15 @@
             const installBanner = document.getElementById('installBanner');
             const installBtn = document.getElementById('installBtn');
             const installClose = document.getElementById('installClose');
+            const googleConfigBtn = document.getElementById('googleConfigBtn');
+            const googleBackupBtn = document.getElementById('googleBackupBtn');
+            const googleRestoreBtn = document.getElementById('googleRestoreBtn');
+            const googleConfigModal = document.getElementById('googleConfigModal');
+            const apiKeyInput = document.getElementById('apiKey');
+            const clientIdInput = document.getElementById('clientId');
+            const configSaveBtn = document.getElementById('configSaveBtn');
+            const configCancelBtn = document.getElementById('configCancelBtn');
+            const googleStatus = document.getElementById('googleStatus');
             
             // 서비스 워커 등록
             if ('serviceWorker' in navigator) {
@@ -630,6 +780,310 @@
             installClose.addEventListener('click', () => {
                 installBanner.style.display = 'none';
             });
+            
+            // 구글 드라이브 동기화 관리자
+            const GoogleDriveManager = {
+                API_KEY: null,
+                CLIENT_ID: null,
+                FILE_ID: null,
+                FILE_NAME: 'darakwon-attendance-data.json',
+                API_DISCOVERY_DOCS: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"],
+                API_SCOPES: 'https://www.googleapis.com/auth/drive.file',
+                isInitialized: false,
+                
+                // 구글 정보 로드
+                loadConfig: function() {
+                    try {
+                        const googleConfig = localStorage.getItem('googleDriveConfig');
+                        if (googleConfig) {
+                            const config = JSON.parse(googleConfig);
+                            this.API_KEY = config.apiKey;
+                            this.CLIENT_ID = config.clientId;
+                            this.FILE_ID = config.fileId;
+                            
+                            // UI 요소 업데이트
+                            apiKeyInput.value = this.API_KEY;
+                            clientIdInput.value = this.CLIENT_ID;
+                            
+                            return true;
+                        }
+                        return false;
+                    } catch (error) {
+                        console.error('구글 드라이브 설정 로드 오류:', error);
+                        return false;
+                    }
+                },
+                
+                // 구글 정보 저장
+                saveConfig: function(apiKey, clientId, fileId = null) {
+                    try {
+                        this.API_KEY = apiKey;
+                        this.CLIENT_ID = clientId;
+                        if (fileId) this.FILE_ID = fileId;
+                        
+                        const config = {
+                            apiKey: this.API_KEY,
+                            clientId: this.CLIENT_ID,
+                            fileId: this.FILE_ID
+                        };
+                        
+                        localStorage.setItem('googleDriveConfig', JSON.stringify(config));
+                        return true;
+                    } catch (error) {
+                        console.error('구글 드라이브 설정 저장 오류:', error);
+                        return false;
+                    }
+                },
+                
+                // Google API 로드 및 초기화
+                init: function() {
+                    if (!this.API_KEY || !this.CLIENT_ID) {
+                        googleStatus.textContent = '구글 드라이브 연동 상태: API 키 및 클라이언트 ID 설정 필요';
+                        return Promise.reject(new Error('API 키 및 클라이언트 ID가 설정되지 않았습니다.'));
+                    }
+                    
+                    return new Promise((resolve, reject) => {
+                        // Google API 클라이언트 라이브러리가 이미 로드되었는지 확인
+                        if (window.gapi && window.gapi.client) {
+                            this.initClient().then(resolve).catch(reject);
+                            return;
+                        }
+                        
+                        // Google API 클라이언트 라이브러리 로드
+                        const script = document.createElement('script');
+                        script.src = 'https://apis.google.com/js/api.js';
+                        script.onload = () => {
+                            gapi.load('client:auth2', () => {
+                                this.initClient().then(resolve).catch(reject);
+                            });
+                        };
+                        script.onerror = (error) => reject(error);
+                        document.body.appendChild(script);
+                    });
+                },
+                
+                // API 클라이언트 초기화
+                initClient: function() {
+                    return gapi.client.init({
+                        apiKey: this.API_KEY,
+                        clientId: this.CLIENT_ID,
+                        discoveryDocs: this.API_DISCOVERY_DOCS,
+                        scope: this.API_SCOPES
+                    }).then(() => {
+                        // 로그인 상태 초기화
+                        if (gapi.auth2.getAuthInstance().isSignedIn.get()) {
+                            this.isInitialized = true;
+                            googleStatus.textContent = '구글 드라이브 연동 상태: 연결됨';
+                            // 파일 ID가 없으면 찾기
+                            if (!this.FILE_ID) {
+                                return this.findOrCreateFile().then(() => {
+                                    return true;
+                                });
+                            }
+                            return true;
+                        } else {
+                            googleStatus.textContent = '구글 드라이브 연동 상태: 로그인 필요';
+                            return this.signIn();
+                        }
+                    }).catch(error => {
+                        googleStatus.textContent = '구글 드라이브 연동 상태: 초기화 실패';
+                        console.error('구글 API 클라이언트 초기화 오류:', error);
+                        throw error;
+                    });
+                },
+                
+                // 로그인
+                signIn: function() {
+                    if (!gapi || !gapi.auth2) {
+                        return Promise.reject(new Error('Google API가 초기화되지 않았습니다.'));
+                    }
+                    
+                    return gapi.auth2.getAuthInstance().signIn()
+                        .then(() => {
+                            this.isInitialized = true;
+                            googleStatus.textContent = '구글 드라이브 연동 상태: 로그인 성공';
+                            // 파일 ID가 없으면 찾기
+                            if (!this.FILE_ID) {
+                                return this.findOrCreateFile();
+                            }
+                            return true;
+                        })
+                        .catch(error => {
+                            googleStatus.textContent = '구글 드라이브 연동 상태: 로그인 실패';
+                            console.error('Google 로그인 오류:', error);
+                            throw error;
+                        });
+                },
+                
+                // 파일 찾기 또는 생성하기
+                findOrCreateFile: function() {
+                    return new Promise((resolve, reject) => {
+                        // 파일 검색
+                        gapi.client.drive.files.list({
+                            q: `name='${this.FILE_NAME}' and trashed=false`,
+                            spaces: 'drive',
+                            fields: 'files(id, name, modifiedTime)'
+                        }).then(response => {
+                            const files = response.result.files;
+                            if (files && files.length > 0) {
+                                // 파일이 존재하면 ID 저장
+                                this.FILE_ID = files[0].id;
+                                this.saveConfig(this.API_KEY, this.CLIENT_ID, this.FILE_ID);
+                                googleStatus.textContent = `구글 드라이브 연동 상태: 파일 찾음 (마지막 수정: ${new Date(files[0].modifiedTime).toLocaleString()})`;
+                                resolve(this.FILE_ID);
+                            } else {
+                                // 파일이 없으면 새로 생성
+                                return this.createFile().then(fileId => {
+                                    resolve(fileId);
+                                });
+                            }
+                        }).catch(error => {
+                            console.error('파일 찾기 오류:', error);
+                            reject(error);
+                        });
+                    });
+                },
+                
+                // 새 파일 생성하기
+                createFile: function() {
+                    return new Promise((resolve, reject) => {
+                        // 빈 JSON 객체로 초기화할 파일 내용
+                        const fileContent = JSON.stringify({});
+                        
+                        // 파일 메타데이터
+                        const metadata = {
+                            name: this.FILE_NAME,
+                            mimeType: 'application/json'
+                        };
+                        
+                        // 바이너리 데이터로 변환
+                        const blob = new Blob([fileContent], {type: 'application/json'});
+                        
+                        // 파일 생성 요청
+                        const form = new FormData();
+                        form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+                        form.append('file', blob);
+                        
+                        fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+                            method: 'POST',
+                            headers: new Headers({
+                                'Authorization': 'Bearer ' + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token
+                            }),
+                            body: form
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.id) {
+                                this.FILE_ID = data.id;
+                                this.saveConfig(this.API_KEY, this.CLIENT_ID, this.FILE_ID);
+                                googleStatus.textContent = '구글 드라이브 연동 상태: 새 파일 생성됨';
+                                resolve(this.FILE_ID);
+                            } else {
+                                reject(new Error('파일 생성 응답에서 ID를 찾을 수 없습니다.'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('파일 생성 오류:', error);
+                            reject(error);
+                        });
+                    });
+                },
+                
+                // 파일 백업 (기존 파일 덮어쓰기)
+                backupFile: function(jsonData) {
+                    return new Promise((resolve, reject) => {
+                        if (!this.isInitialized) {
+                            this.init().then(() => {
+                                this.backupFile(jsonData).then(resolve).catch(reject);
+                            }).catch(reject);
+                            return;
+                        }
+                        
+                        if (!this.FILE_ID) {
+                            this.findOrCreateFile().then(() => {
+                                this.backupFile(jsonData).then(resolve).catch(reject);
+                            }).catch(reject);
+                            return;
+                        }
+                        
+                        // 바이너리 데이터로 변환
+                        const blob = new Blob([jsonData], {type: 'application/json'});
+                        
+                        // 파일 업데이트 요청
+                        fetch(`https://www.googleapis.com/upload/drive/v3/files/${this.FILE_ID}?uploadType=media`, {
+                            method: 'PATCH',
+                            headers: new Headers({
+                                'Authorization': 'Bearer ' + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token,
+                                'Content-Type': 'application/json'
+                            }),
+                            body: jsonData
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                googleStatus.textContent = '구글 드라이브 연동 상태: 백업 완료 (' + new Date().toLocaleString() + ')';
+                                resolve(true);
+                            } else {
+                                return response.json().then(data => {
+                                    reject(new Error(`파일 업데이트 실패: ${data.error ? data.error.message : response.statusText}`));
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('파일 업데이트 오류:', error);
+                            reject(error);
+                        });
+                    });
+                },
+                
+                // 파일 복원 (파일에서 데이터 가져오기)
+                restoreFile: function() {
+                    return new Promise((resolve, reject) => {
+                        if (!this.isInitialized) {
+                            this.init().then(() => {
+                                this.restoreFile().then(resolve).catch(reject);
+                            }).catch(reject);
+                            return;
+                        }
+                        
+                        if (!this.FILE_ID) {
+                            this.findOrCreateFile().then(() => {
+                                this.restoreFile().then(resolve).catch(reject);
+                            }).catch(reject);
+                            return;
+                        }
+                        
+                        // 파일 다운로드 요청
+                        fetch(`https://www.googleapis.com/drive/v3/files/${this.FILE_ID}?alt=media`, {
+                            headers: new Headers({
+                                'Authorization': 'Bearer ' + gapi.auth2.getAuthInstance().currentUser.get().getAuthResponse().access_token
+                            })
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                return response.text();
+                            } else {
+                                return response.json().then(data => {
+                                    throw new Error(`파일 다운로드 실패: ${data.error ? data.error.message : response.statusText}`);
+                                });
+                            }
+                        })
+                        .then(content => {
+                            // 유효한 JSON인지 확인
+                            try {
+                                const jsonData = JSON.parse(content);
+                                googleStatus.textContent = '구글 드라이브 연동 상태: 복원 완료 (' + new Date().toLocaleString() + ')';
+                                resolve(jsonData);
+                            } catch (error) {
+                                reject(new Error('파일 내용이 유효한 JSON 형식이 아닙니다.'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('파일 다운로드 오류:', error);
+                            reject(error);
+                        });
+                    });
+                }
+            };
             
             // 스토리지 관리자 - IndexedDB, localStorage 또는 메모리 스토리지 사용
             const StorageManager = {
@@ -725,7 +1179,7 @@
                     });
                 },
                 
-// 데이터 저장하기
+                // 데이터 저장하기
                 setItem: function(key, value) {
                     return new Promise((resolve) => {
                         // IndexedDB 사용
@@ -1162,6 +1616,110 @@
                 document.getElementById('restoreInput').click();
             });
             
+            // 구글 API 정보 저장 버튼 클릭 이벤트
+            googleConfigBtn.addEventListener('click', function() {
+                vibrate(this);
+                
+                // 저장된 설정 불러오기
+                GoogleDriveManager.loadConfig();
+                
+                // 모달 표시
+                googleConfigModal.style.display = 'flex';
+            });
+            
+            // 구글 설정 저장 버튼 클릭 이벤트
+            configSaveBtn.addEventListener('click', async function() {
+                const apiKey = apiKeyInput.value.trim();
+                const clientId = clientIdInput.value.trim();
+                
+                if (!apiKey || !clientId) {
+                    showToast('API Key와 Client ID를 입력해주세요.');
+                    return;
+                }
+                
+                // 설정 저장
+                if (GoogleDriveManager.saveConfig(apiKey, clientId)) {
+                    googleConfigModal.style.display = 'none';
+                    showToast('구글 드라이브 설정이 저장되었습니다.');
+                    
+                    // 구글 API 초기화 시도
+                    try {
+                        await GoogleDriveManager.init();
+                        showToast('구글 드라이브 연동이 완료되었습니다.');
+                    } catch (error) {
+                        console.error('구글 드라이브 초기화 오류:', error);
+                        showToast('구글 드라이브 연동 중 오류가 발생했습니다.');
+                    }
+                } else {
+                    showToast('설정 저장 중 오류가 발생했습니다.');
+                }
+            });
+            
+            // 구글 설정 취소 버튼 클릭 이벤트
+            configCancelBtn.addEventListener('click', function() {
+                googleConfigModal.style.display = 'none';
+            });
+            
+            // 구글 백업 버튼 클릭 이벤트
+            googleBackupBtn.addEventListener('click', async function() {
+                vibrate(this);
+                
+                // 구글 드라이브 설정 확인
+                if (!GoogleDriveManager.API_KEY || !GoogleDriveManager.CLIENT_ID) {
+                    showToast('구글 드라이브 API 설정이 필요합니다.');
+                    googleConfigBtn.click(); // 설정 모달 열기
+                    return;
+                }
+                
+                try {
+                    // 현재 데이터 가져오기
+                    const data = await getAttendanceData();
+                    const jsonData = JSON.stringify(data);
+                    
+                    // 구글 드라이브에 백업
+                    await GoogleDriveManager.backupFile(jsonData);
+                    showToast('구글 드라이브에 백업되었습니다.');
+                } catch (error) {
+                    console.error('구글 드라이브 백업 오류:', error);
+                    showToast('구글 드라이브 백업 중 오류가 발생했습니다: ' + error.message);
+                }
+            });
+            
+            // 구글 복원 버튼 클릭 이벤트
+            googleRestoreBtn.addEventListener('click', async function() {
+                vibrate(this);
+                
+                // 구글 드라이브 설정 확인
+                if (!GoogleDriveManager.API_KEY || !GoogleDriveManager.CLIENT_ID) {
+                    showToast('구글 드라이브 API 설정이 필요합니다.');
+                    googleConfigBtn.click(); // 설정 모달 열기
+                    return;
+                }
+                
+                try {
+                    // 구글 드라이브에서 데이터 복원
+                    const data = await GoogleDriveManager.restoreFile();
+                    
+                    // 로컬 데이터 업데이트
+                    await saveAttendanceData(data);
+                    
+                    // 출근부 다시 렌더링
+                    await renderAttendanceSheet();
+                    
+                    showToast('구글 드라이브에서 데이터가 복원되었습니다.');
+                } catch (error) {
+                    console.error('구글 드라이브 복원 오류:', error);
+                    showToast('구글 드라이브 복원 중 오류가 발생했습니다: ' + error.message);
+                }
+            });
+            
+            // 모달 외부 클릭 시 닫기
+            googleConfigModal.addEventListener('click', function(e) {
+                if (e.target === googleConfigModal) {
+                    googleConfigModal.style.display = 'none';
+                }
+            });
+            
             // 모바일 터치 이벤트 최적화
             document.addEventListener('touchstart', function() {}, {passive: true});
             
@@ -1169,6 +1727,13 @@
             async function initApp() {
                 // 스토리지 초기화
                 await StorageManager.init();
+                
+                // 구글 드라이브 설정 로드
+                if (GoogleDriveManager.loadConfig()) {
+                    googleStatus.textContent = '구글 드라이브 연동 상태: 설정됨 (연결 대기 중)';
+                } else {
+                    googleStatus.textContent = '구글 드라이브 연동 상태: 설정 필요';
+                }
                 
                 // 앱이 로드될 때 토스트 메시지 표시
                 setTimeout(() => {
