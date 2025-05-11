@@ -146,13 +146,8 @@ class AttendanceApp {
             this.checkInBtn.classList.remove('pulse');
         }, 500);
         
-        // 출근 시간 기록
-        const success = await this.db.checkIn(date, time);
-        
-        if (success) {
-            // 파일 백업
-            this.backupToFile();
-        }
+        // 출근 시간 기록 (로컬저장소에만 저장)
+        await this.db.checkIn(date, time);
     }
     
     /**
@@ -173,13 +168,8 @@ class AttendanceApp {
             this.checkOutBtn.classList.remove('pulse');
         }, 500);
         
-        // 퇴근 시간 기록
-        const success = await this.db.checkOut(date, time);
-        
-        if (success) {
-            // 파일 백업
-            this.backupToFile();
-        }
+        // 퇴근 시간 기록 (로컬저장소에만 저장)
+        await this.db.checkOut(date, time);
     }
     
     /**
@@ -188,6 +178,20 @@ class AttendanceApp {
     async showAttendanceRecord() {
         // 진동 피드백
         this.vibrate();
+        
+        // 모달 표시 (이모지 레이어 표시용)
+        this.recordModal.style.display = 'block';
+        
+        // 모달 컨텐츠는 숨김 (이모지 애니메이션 끝날 때까지)
+        const modalContent = this.recordModal.querySelector('.modal-content');
+        modalContent.style.opacity = '0';
+        modalContent.style.transform = 'translateY(20px)';
+        modalContent.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        
+        // 모달 전체 표시
+        setTimeout(() => {
+            this.recordModal.style.opacity = '1';
+        }, 10);
         
         // 현재 날짜
         const today = new Date();
@@ -205,11 +209,11 @@ class AttendanceApp {
         // 지난주 출근부 생성
         this.renderWeeklyTable('lastWeekTable', lastWeekDates, lastWeekRecords);
         
-        // 모달 표시
-        this.recordModal.style.display = 'block';
+        // 이모지 애니메이션 후 모달 컨텐츠 표시
         setTimeout(() => {
-            this.recordModal.style.opacity = '1';
-        }, 10);
+            modalContent.style.opacity = '1';
+            modalContent.style.transform = 'translateY(0)';
+        }, 2000); // 이모지 애니메이션이 약 2초 정도 지속됨
     }
     
     /**
@@ -625,49 +629,7 @@ class AttendanceApp {
         // 이는 구글 API 클라이언트 라이브러리와 OAuth 인증을 필요로 합니다.
     }
     
-    /**
-     * 파일 백업
-     */
-    async backupToFile() {
-        try {
-            // 데이터 내보내기
-            const blob = await this.db.exportData();
-            
-            if (blob) {
-                // 로컬 파일로 저장
-                const saveBlob = async (blob) => {
-                    try {
-                        // Chrome의 FileSystem API 사용 시도
-                        if ('chooseFileSystemEntries' in window || 'showSaveFilePicker' in window) {
-                            const handle = await window.showSaveFilePicker({
-                                suggestedName: 'darakwon-attendance-backup.json',
-                                types: [{
-                                    description: 'JSON Files',
-                                    accept: { 'application/json': ['.json'] }
-                                }]
-                            });
-                            
-                            const writable = await handle.createWritable();
-                            await writable.write(blob);
-                            await writable.close();
-                            
-                            return true;
-                        }
-                    } catch (e) {
-                        console.log('자동 파일 저장 실패, 대체 방법 사용');
-                    }
-                    
-                    return false;
-                };
-                
-                // 자동 저장 실패 시 아무 작업 없이 진행 (백그라운드 동기화 작업이므로)
-                await saveBlob(blob).catch(e => {});
-            }
-        } catch (error) {
-            console.error('자동 백업 오류:', error);
-            // 백그라운드 작업이므로 오류 메시지 표시 없음
-        }
-    }
+    // backupToFile 함수는 제거 (불필요함)
     
     /**
      * 오프라인 상태 표시기 생성
