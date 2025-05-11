@@ -25,6 +25,27 @@ const UI = (() => {
         toast: document.getElementById('toast')
     };
     
+    /**
+     * DOM 요소 재확인
+     * 페이지 로드 이후 DOM 요소가 준비되었는지 확인하고 업데이트
+     */
+    const refreshDOMElements = () => {
+        // 출근부 관련 요소
+        elements.currentWeekBody = document.getElementById('currentWeekBody');
+        elements.lastWeekBody = document.getElementById('lastWeekBody');
+        elements.currentWeekTotal = document.getElementById('currentWeekTotal');
+        elements.lastWeekTotal = document.getElementById('lastWeekTotal');
+        
+        // 버튼 요소들
+        elements.checkInBtn = document.getElementById('checkInBtn') || elements.checkInBtn;
+        elements.checkOutBtn = document.getElementById('checkOutBtn') || elements.checkOutBtn;
+        elements.attendanceBtn = document.getElementById('attendanceBtn') || elements.attendanceBtn;
+        
+        // 레이어 요소
+        elements.attendanceLayer = document.getElementById('attendanceLayer') || elements.attendanceLayer;
+        elements.closeLayerBtn = document.getElementById('closeLayerBtn') || elements.closeLayerBtn;
+    };
+    
     // 요일 이름
     const dayNames = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
     
@@ -75,32 +96,72 @@ const UI = (() => {
      * 출근부 레이어 열기
      */
     const openAttendanceLayer = () => {
+        // DOM 요소 재확인
+        refreshDOMElements();
+        
+        // 요소가 존재하는지 확인
+        if (!elements.attendanceLayer) {
+            console.error('출근부 레이어 요소를 찾을 수 없습니다.');
+            showToast('출근부를 표시할 수 없습니다.');
+            return;
+        }
+        
         elements.attendanceLayer.style.display = 'flex';
         
+        const layerContent = elements.attendanceLayer.querySelector('.layer-content');
+        if (!layerContent) {
+            console.error('레이어 콘텐츠 요소를 찾을 수 없습니다.');
+            return;
+        }
+        
         // GSAP 애니메이션
-        gsap.fromTo(
-            elements.attendanceLayer.querySelector('.layer-content'),
-            { opacity: 0, y: 20 },
-            { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
-        );
+        try {
+            gsap.fromTo(
+                layerContent,
+                { opacity: 0, y: 20 },
+                { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' }
+            );
+        } catch (error) {
+            console.error('애니메이션 적용 오류:', error);
+            // 애니메이션이 실패해도 레이어는 표시
+        }
     };
     
     /**
      * 출근부 레이어 닫기
      */
     const closeAttendanceLayer = () => {
-        gsap.to(
-            elements.attendanceLayer.querySelector('.layer-content'),
-            {
-                opacity: 0,
-                y: 20,
-                duration: 0.2,
-                ease: 'power2.in',
-                onComplete: () => {
-                    elements.attendanceLayer.style.display = 'none';
+        // 요소가 존재하는지 확인
+        if (!elements.attendanceLayer) {
+            console.error('출근부 레이어 요소를 찾을 수 없습니다.');
+            return;
+        }
+        
+        const layerContent = elements.attendanceLayer.querySelector('.layer-content');
+        if (!layerContent) {
+            console.error('레이어 콘텐츠 요소를 찾을 수 없습니다.');
+            elements.attendanceLayer.style.display = 'none';
+            return;
+        }
+        
+        try {
+            gsap.to(
+                layerContent,
+                {
+                    opacity: 0,
+                    y: 20,
+                    duration: 0.2,
+                    ease: 'power2.in',
+                    onComplete: () => {
+                        elements.attendanceLayer.style.display = 'none';
+                    }
                 }
-            }
-        );
+            );
+        } catch (error) {
+            console.error('애니메이션 적용 오류:', error);
+            // 애니메이션이 실패해도 레이어는 닫음
+            elements.attendanceLayer.style.display = 'none';
+        }
     };
     
     /**
@@ -317,106 +378,116 @@ const UI = (() => {
      * @param {HTMLElement} totalElement - 합계 표시 요소
      */
     const renderWeekTable = async (year, weekNumber, tableBody, totalElement) => {
-        // 해당 주차의 첫 날 찾기
-        const firstDayOfWeek = getFirstDayOfWeek(year, weekNumber);
-        
-        // 테이블 본문 초기화
-        tableBody.innerHTML = '';
-        
-        // 주간 데이터 가져오기
-        const weekData = await DB.getWeekData(year, weekNumber);
-        
-        // 각 날짜에 대한 행 생성
-        for (let i = 0; i < 7; i++) {
-            const currentDate = new Date(firstDayOfWeek);
-            currentDate.setDate(firstDayOfWeek.getDate() + i);
-            
-            const dateString = currentDate.toISOString().split('T')[0];
-            const day = currentDate.getDate();
-            const dayOfWeek = currentDate.getDay();
-            
-            // 해당 날짜의 데이터 찾기
-            const dayData = weekData.find(data => data.date === dateString) || {};
-            
-            // 행 생성
-            const row = document.createElement('tr');
-            
-            // 날짜 셀
-            const dateCell = document.createElement('td');
-            dateCell.textContent = String(day).padStart(2, '0') + '일';
-            row.appendChild(dateCell);
-            
-            // 요일 셀
-            const dayNameCell = document.createElement('td');
-            dayNameCell.textContent = dayNames[dayOfWeek];
-            // 주말 색상 표시
-            if (dayOfWeek === 0) dayNameCell.classList.add('sunday');
-            if (dayOfWeek === 6) dayNameCell.classList.add('saturday');
-            row.appendChild(dayNameCell);
-            
-            // 출근 시간 셀
-            const checkInCell = document.createElement('td');
-            checkInCell.textContent = formatTimeToKorean(dayData.checkInTime || '');
-            checkInCell.classList.add('time-cell');
-            checkInCell.addEventListener('click', () => {
-                makeTimeEditable(checkInCell, dayData.checkInTime, async (newValue) => {
-                    // 데이터 업데이트
-                    const updatedData = { ...dayData, checkInTime: newValue };
-                    await DB.saveData(dateString, updatedData);
-                    
-                    // 근무시간 업데이트
-                    if (updatedData.checkOutTime) {
-                        const hours = calculateWorkHours(newValue, updatedData.checkOutTime);
-                        workHoursCell.textContent = hours > 0 ? hours + '시간' : '';
-                        
-                        // 주간 합계 업데이트
-                        const updatedWeekData = await DB.getWeekData(year, weekNumber);
-                        const weekdayTotal = calculateWeekdayTotal(updatedWeekData);
-                        totalElement.textContent = weekdayTotal + '시간';
-                    }
-                });
-            });
-            row.appendChild(checkInCell);
-            
-            // 퇴근 시간 셀
-            const checkOutCell = document.createElement('td');
-            checkOutCell.textContent = formatTimeToKorean(dayData.checkOutTime || '');
-            checkOutCell.classList.add('time-cell');
-            checkOutCell.addEventListener('click', () => {
-                makeTimeEditable(checkOutCell, dayData.checkOutTime, async (newValue) => {
-                    // 데이터 업데이트
-                    const updatedData = { ...dayData, checkOutTime: newValue };
-                    await DB.saveData(dateString, updatedData);
-                    
-                    // 근무시간 업데이트
-                    if (updatedData.checkInTime) {
-                        const hours = calculateWorkHours(updatedData.checkInTime, newValue);
-                        workHoursCell.textContent = hours > 0 ? hours + '시간' : '';
-                        
-                        // 주간 합계 업데이트
-                        const updatedWeekData = await DB.getWeekData(year, weekNumber);
-                        const weekdayTotal = calculateWeekdayTotal(updatedWeekData);
-                        totalElement.textContent = weekdayTotal + '시간';
-                    }
-                });
-            });
-            row.appendChild(checkOutCell);
-            
-            // 근무 시간 셀
-            const workHoursCell = document.createElement('td');
-            if (dayData.checkInTime && dayData.checkOutTime) {
-                const hours = calculateWorkHours(dayData.checkInTime, dayData.checkOutTime);
-                workHoursCell.textContent = hours > 0 ? hours + '시간' : '';
+        try {
+            // 요소가 존재하는지 확인
+            if (!tableBody || !totalElement) {
+                console.error('테이블 요소가 존재하지 않습니다:', { tableBody, totalElement });
+                return;
             }
-            row.appendChild(workHoursCell);
             
-            // 테이블에 행 추가
-            tableBody.appendChild(row);
+            // 해당 주차의 첫 날 찾기
+            const firstDayOfWeek = getFirstDayOfWeek(year, weekNumber);
+            
+            // 테이블 본문 초기화
+            tableBody.innerHTML = '';
+            
+            // 주간 데이터 가져오기
+            const weekData = await DB.getWeekData(year, weekNumber);
+            
+            // 각 날짜에 대한 행 생성
+            for (let i = 0; i < 7; i++) {
+                const currentDate = new Date(firstDayOfWeek);
+                currentDate.setDate(firstDayOfWeek.getDate() + i);
+                
+                const dateString = currentDate.toISOString().split('T')[0];
+                const day = currentDate.getDate();
+                const dayOfWeek = currentDate.getDay();
+                
+                // 해당 날짜의 데이터 찾기
+                const dayData = weekData.find(data => data.date === dateString) || {};
+                
+                // 행 생성
+                const row = document.createElement('tr');
+                
+                // 날짜 셀
+                const dateCell = document.createElement('td');
+                dateCell.textContent = String(day).padStart(2, '0') + '일';
+                row.appendChild(dateCell);
+                
+                // 요일 셀
+                const dayNameCell = document.createElement('td');
+                dayNameCell.textContent = dayNames[dayOfWeek];
+                // 주말 색상 표시
+                if (dayOfWeek === 0) dayNameCell.classList.add('sunday');
+                if (dayOfWeek === 6) dayNameCell.classList.add('saturday');
+                row.appendChild(dayNameCell);
+                
+                // 출근 시간 셀
+                const checkInCell = document.createElement('td');
+                checkInCell.textContent = formatTimeToKorean(dayData.checkInTime || '');
+                checkInCell.classList.add('time-cell');
+                checkInCell.addEventListener('click', () => {
+                    makeTimeEditable(checkInCell, dayData.checkInTime, async (newValue) => {
+                        // 데이터 업데이트
+                        const updatedData = { ...dayData, checkInTime: newValue };
+                        await DB.saveData(dateString, updatedData);
+                        
+                        // 근무시간 업데이트
+                        if (updatedData.checkOutTime) {
+                            const hours = calculateWorkHours(newValue, updatedData.checkOutTime);
+                            workHoursCell.textContent = hours > 0 ? hours + '시간' : '';
+                            
+                            // 주간 합계 업데이트
+                            const updatedWeekData = await DB.getWeekData(year, weekNumber);
+                            const weekdayTotal = calculateWeekdayTotal(updatedWeekData);
+                            totalElement.textContent = weekdayTotal + '시간';
+                        }
+                    });
+                });
+                row.appendChild(checkInCell);
+                
+                // 퇴근 시간 셀
+                const checkOutCell = document.createElement('td');
+                checkOutCell.textContent = formatTimeToKorean(dayData.checkOutTime || '');
+                checkOutCell.classList.add('time-cell');
+                checkOutCell.addEventListener('click', () => {
+                    makeTimeEditable(checkOutCell, dayData.checkOutTime, async (newValue) => {
+                        // 데이터 업데이트
+                        const updatedData = { ...dayData, checkOutTime: newValue };
+                        await DB.saveData(dateString, updatedData);
+                        
+                        // 근무시간 업데이트
+                        if (updatedData.checkInTime) {
+                            const hours = calculateWorkHours(updatedData.checkInTime, newValue);
+                            workHoursCell.textContent = hours > 0 ? hours + '시간' : '';
+                            
+                            // 주간 합계 업데이트
+                            const updatedWeekData = await DB.getWeekData(year, weekNumber);
+                            const weekdayTotal = calculateWeekdayTotal(updatedWeekData);
+                            totalElement.textContent = weekdayTotal + '시간';
+                        }
+                    });
+                });
+                row.appendChild(checkOutCell);
+                
+                // 근무 시간 셀
+                const workHoursCell = document.createElement('td');
+                if (dayData.checkInTime && dayData.checkOutTime) {
+                    const hours = calculateWorkHours(dayData.checkInTime, dayData.checkOutTime);
+                    workHoursCell.textContent = hours > 0 ? hours + '시간' : '';
+                }
+                row.appendChild(workHoursCell);
+                
+                // 테이블에 행 추가
+                tableBody.appendChild(row);
+            }
+            
+            // 주중 근무시간 합계 계산 및 표시
+            const weekdayTotal = calculateWeekdayTotal(weekData);
+            totalElement.textContent = weekdayTotal + '시간';
+        } catch (error) {
+            console.error('주간 테이블 렌더링 오류:', error, { year, weekNumber });
         }
-        
-        // 주중 근무시간 합계 계산 및 표시
-        const weekdayTotal = calculateWeekdayTotal(weekData);
-        totalElement.textContent = weekdayTotal + '시간';
     };
     
     /**
@@ -448,24 +519,46 @@ const UI = (() => {
      * 출근부 테이블 렌더링
      */
     const renderAttendanceTables = async () => {
-        // 현재 날짜의 연도와 주차
-        const today = new Date();
-        const [currentYear, currentWeek] = DB.getWeekNumber(today);
-        
-        // 지난주 계산
-        let lastWeek = currentWeek - 1;
-        let lastWeekYear = currentYear;
-        
-        if (lastWeek < 1) {
-            lastWeek = getWeeksInYear(currentYear - 1);
-            lastWeekYear = currentYear - 1;
+        try {
+            // 현재 날짜의 연도와 주차
+            const today = new Date();
+            const [currentYear, currentWeek] = DB.getWeekNumber(today);
+            
+            // 지난주 계산
+            let lastWeek = currentWeek - 1;
+            let lastWeekYear = currentYear;
+            
+            if (lastWeek < 1) {
+                lastWeek = getWeeksInYear(currentYear - 1);
+                lastWeekYear = currentYear - 1;
+            }
+            
+            // DOM 요소 확인 및 가져오기
+            const currentWeekBody = document.getElementById('currentWeekBody');
+            const lastWeekBody = document.getElementById('lastWeekBody');
+            const currentWeekTotal = document.getElementById('currentWeekTotal');
+            const lastWeekTotal = document.getElementById('lastWeekTotal');
+            
+            // 요소가 존재하는지 확인
+            if (!currentWeekBody || !lastWeekBody || !currentWeekTotal || !lastWeekTotal) {
+                console.error('출근부 테이블 요소를 찾을 수 없습니다:', { 
+                    currentWeekBody, lastWeekBody, currentWeekTotal, lastWeekTotal 
+                });
+                
+                // 요소가 없는 경우 오류 메시지 표시
+                showToast('출근부를 표시하는 중 오류가 발생했습니다.');
+                return;
+            }
+            
+            // 이번주 테이블 렌더링
+            await renderWeekTable(currentYear, currentWeek, currentWeekBody, currentWeekTotal);
+            
+            // 지난주 테이블 렌더링
+            await renderWeekTable(lastWeekYear, lastWeek, lastWeekBody, lastWeekTotal);
+        } catch (error) {
+            console.error('출근부 테이블 렌더링 오류:', error);
+            showToast('출근부를 표시하는 중 오류가 발생했습니다.');
         }
-        
-        // 이번주 테이블 렌더링
-        await renderWeekTable(currentYear, currentWeek, elements.currentWeekBody, elements.currentWeekTotal);
-        
-        // 지난주 테이블 렌더링
-        await renderWeekTable(lastWeekYear, lastWeek, elements.lastWeekBody, elements.lastWeekTotal);
     };
     
     /**
@@ -611,8 +704,28 @@ const UI = (() => {
         
         // 출근부 버튼 클릭
         elements.attendanceBtn.addEventListener('click', async () => {
-            await renderAttendanceTables();
-            openAttendanceLayer();
+            try {
+                // DOM 요소 재확인
+                refreshDOMElements();
+                
+                // 출근부 테이블 렌더링 전에 요소가 존재하는지 확인
+                if (!elements.currentWeekBody || !elements.lastWeekBody || !elements.currentWeekTotal || !elements.lastWeekTotal) {
+                    console.error('출근부 테이블 요소를 찾을 수 없습니다:', { 
+                        currentWeekBody: elements.currentWeekBody, 
+                        lastWeekBody: elements.lastWeekBody, 
+                        currentWeekTotal: elements.currentWeekTotal, 
+                        lastWeekTotal: elements.lastWeekTotal 
+                    });
+                    showToast('출근부를 표시할 수 없습니다. 페이지를 새로고침 해보세요.');
+                    return;
+                }
+                
+                await renderAttendanceTables();
+                openAttendanceLayer();
+            } catch (error) {
+                console.error('출근부 표시 오류:', error);
+                showToast('출근부를 표시하는 중 오류가 발생했습니다.');
+            }
         });
         
         // 출근부 레이어 닫기 버튼
@@ -772,14 +885,39 @@ const UI = (() => {
      * UI 모듈 초기화
      */
     const init = () => {
-        // 이벤트 리스너 설정
-        initEventListeners();
-        
-        // PWA 인스톨 이벤트 처리
-        window.addEventListener('beforeinstallprompt', (e) => {
-            // 인스톨 프롬프트 저장
-            window.deferredInstallPrompt = e;
-        });
+        try {
+            console.log('UI 초기화 시작...');
+            
+            // DOM 요소 최초 확인
+            refreshDOMElements();
+            
+            // 누락된 필수 요소 확인
+            const criticalElements = ['checkInBtn', 'checkOutBtn', 'attendanceBtn', 'toast'];
+            const missingElements = criticalElements.filter(id => !elements[id]);
+            
+            if (missingElements.length > 0) {
+                console.error('필수 UI 요소를 찾을 수 없습니다:', missingElements);
+            }
+            
+            // 이벤트 리스너 설정
+            initEventListeners();
+            
+            // PWA 인스톨 이벤트 처리
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // 인스톨 프롬프트 저장
+                window.deferredInstallPrompt = e;
+            });
+            
+            // 페이지 로드 완료 후 한 번 더 DOM 요소 확인
+            window.addEventListener('load', () => {
+                refreshDOMElements();
+                console.log('UI 초기화 완료 (페이지 로드 후)');
+            });
+            
+            console.log('UI 초기화 완료');
+        } catch (error) {
+            console.error('UI 초기화 오류:', error);
+        }
     };
     
     // 공개 API
