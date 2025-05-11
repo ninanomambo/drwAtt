@@ -3,10 +3,10 @@ const CACHE_NAME = 'darakwon-attendance-cache-v1';
 
 // 캐싱할 파일 목록
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/icon.png',
-  '/og_image.png'
+  '/drwAtt/',
+  '/drwAtt/index.html',
+  '/drwAtt/icon.png',
+  '/drwAtt/og_image.png'
 ];
 
 // Service Worker 설치 시 캐시 등록

@@ -10,14 +10,14 @@
     <meta name="application-name" content="Darakwon Attendance">
     
     <!-- PWA 관련 메타태그 및 링크 -->
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" href="icon.png">
-    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="manifest" href="/drwAtt/manifest.json">
+    <link rel="icon" href="/drwAtt/icon.png">
+    <link rel="apple-touch-icon" href="/drwAtt/icon.png">
     
     <!-- 오픈그래프 메타태그 -->
     <meta property="og:title" content="Darakwon Attendance - 간편한 출퇴근 기록 관리 앱">
     <meta property="og:description" content="다락원 근태기록 앱">
-    <meta property="og:image" content="og_image.png">
+    <meta property="og:image" content="/drwAtt/og_image.png">
     <meta property="og:url" content="https://ninanomambo.github.io/drwAtt/">
     <meta property="og:type" content="website">
     
@@ -734,7 +734,7 @@
             // 서비스 워커 등록
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('sw.js')
+                    navigator.serviceWorker.register('/drwAtt/sw.js')
                         .then(registration => {
                             console.log('서비스 워커 등록 성공:', registration.scope);
                         })

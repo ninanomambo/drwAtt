@@ -2,7 +2,7 @@
   "name": "Darakwon Attendance",
   "short_name": "다락원 근태앱",
   "description": "다락원 근태기록 앱",
-  "start_url": "/",
+  "start_url": "/drwAtt/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4a4a4a",
