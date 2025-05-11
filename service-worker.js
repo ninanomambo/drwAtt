@@ -16,8 +16,8 @@ const CACHE_FILES = [
   '/drwAtt/js/ui.js',
   '/drwAtt/js/googleApi.js',
   '/drwAtt/icon.png',
-  '/drwAtt/manifest.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js'
+  '/drwAtt/manifest.json'
+  // GSAP는 CDN에서 가져오므로 여기서 명시적으로 캐시하지 않고 fetch 이벤트에서 처리
 ];
 
 // 서비스 워커 설치
@@ -30,7 +30,20 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('서비스 워커: 캐시 초기화 및 파일 저장');
-        return cache.addAll(CACHE_FILES);
+        
+        // 각 파일을 개별적으로 캐시하여 하나의 파일 실패가 전체 과정을 중단하지 않도록 함
+        const cachePromises = CACHE_FILES.map(url => {
+          return cache.add(url).catch(error => {
+            console.error(`파일 캐싱 실패 (무시됨): ${url}`, error);
+            // 오류가 발생해도 Promise는 resolve 상태로 유지
+            return Promise.resolve();
+          });
+        });
+        
+        return Promise.all(cachePromises);
+      })
+      .catch(error => {
+        console.error('서비스 워커 설치 중 오류:', error);
       })
   );
 });
@@ -59,6 +72,11 @@ self.addEventListener('activate', (event) => {
 
 // 네트워크 요청 처리
 self.addEventListener('fetch', (event) => {
+  // 지원되지 않는 스키마(chrome-extension:// 등) 요청은 처리하지 않음
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
   // Google Drive API 요청은 캐싱하지 않음
   if (event.request.url.includes('googleapis.com')) {
     return;
@@ -97,22 +115,37 @@ self.addEventListener('fetch', (event) => {
               return networkResponse;
             }
             
-            // 응답 복제 후 캐시에 저장
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME)
-              .then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
+            try {
+              // 응답 복제 후 캐시에 저장
+              const responseToCache = networkResponse.clone();
+              caches.open(CACHE_NAME)
+                .then((cache) => {
+                  // HTTP 또는 HTTPS 요청만 캐시
+                  if (event.request.url.startsWith('http')) {
+                    cache.put(event.request, responseToCache);
+                  }
+                })
+                .catch(error => {
+                  console.error('캐시 저장 오류:', error);
+                });
+            } catch (error) {
+              console.error('응답 처리 오류:', error);
+            }
             
             return networkResponse;
           })
           .catch((error) => {
             console.error('네트워크 요청 실패:', error);
             // 네트워크 오류 시 오프라인 페이지 반환
-            if (event.request.headers.get('accept').includes('text/html')) {
+            if (event.request.headers.get('accept')?.includes('text/html')) {
               return caches.match('/drwAtt/index.html');
             }
+            
+            throw error;
           });
+      })
+      .catch(error => {
+        console.error('fetch 이벤트 처리 오류:', error);
       })
   );
 });
