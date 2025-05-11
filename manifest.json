@@ -1,0 +1,25 @@
+{
+  "name": "Darakwon Attendance",
+  "short_name": "다락원 근태앱",
+  "description": "다락원 근태기록 앱",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4a4a4a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "og_image.png",
+      "sizes": "1200x630",
+      "type": "image/png"
+    }
+  ]
+}

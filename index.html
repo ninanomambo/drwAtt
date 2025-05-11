@@ -5,11 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#4a4a4a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Darakwon Attendance">
-    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAACXBIWXMAAAsTAAALEwEAmpwYAAABXUlEQVR4nO3YsQ3CMBRAFQZIED/JDrCW9IymyBrJAtQ0pGZGNB6g8Hu1jV0lX2VnNwMAAAAAAAAAAAAAAAAAgLHSO3OT12f1h3DImE5dEiABIgESIAESIAEyGgkQCRAJEPYnASIBIgHC/iRAvvI+VH8Bx/U6Vn8Bx7UMAyRAJEAkQNifBIgEiAQI+5MAmbd5rf4CDmtZ5uoPAAAAAAAAAAAAAAAAAAAAAAAAgKs6ve4f6fbGu92L1R7P/bWQAJEAkQBhfxIgEiASIOxPAkQCRAKE/UmASIBIgLA/CZDfa91UfwHHNXdd9QcAAAAAAAAAAAAAAAAAAAAAAABwUac/vmOd5y6p9niWkACRAJEAYX8SIBIgEiDsTwJEAkQChP1JgEiASICwPwmQj+m7+gs4rnnYqj8AAAAAAAAAAAAAAAAAAAAAAADgop7f6zqt6dQlARLw9+wkQCRAJEAkQEae3VT9AQAAAAAAAAAAAAAAAMDf9QKcuF9YlimGMgAAAABJRU5ErkJggg==">
-    <title>Darakwon Attendance Ver 0.1</title>
+    
+    <!-- PWA 관련 메타태그 및 링크 -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="icon.png">
+    <link rel="apple-touch-icon" href="icon.png">
+    
+    <!-- 오픈그래프 메타태그 -->
+    <meta property="og:title" content="Darakwon Attendance - 간편한 출퇴근 기록 관리 앱">
+    <meta property="og:description" content="다락원 근태기록 앱">
+    <meta property="og:image" content="og_image.png">
+    <meta property="og:url" content="https://ninanomambo.github.io/drwAtt/">
+    <meta property="og:type" content="website">
+    
+    <!-- 트위터 카드 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Darakwon Attendance - 간편한 출퇴근 기록 관리 앱">
+    <meta name="twitter:description" content="다락원 근태기록 앱">
+    <meta name="twitter:image" content="og_image.png">
+    
     <title>Darakwon Attendance Ver 0.1</title>
     <style>
         * {
@@ -24,7 +41,7 @@
             background-color: #f7f7f7;
             height: 100vh;
             width: 100%;
-            overflow-x: hidden;
+            overflow-x: hidden; 
             position: fixed;
         }
         
@@ -138,7 +155,7 @@
         .attendance-btn-icon {
             margin-right: 8px;
         }
-        
+
         .data-management {
             display: flex;
             justify-content: center;
@@ -170,6 +187,38 @@
         
         .data-btn-icon {
             margin-right: 5px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        
+        .status-online {
+            background-color: #4CAF50;
+        }
+        
+        .status-offline {
+            background-color: #F44336;
+        }
+        
+        .current-time {
+            text-align: center;
+            font-size: 14px;
+            color: #777;
+            margin-top: auto;
+            padding: 15px 0;
         }
         
         .overlay {
@@ -326,30 +375,6 @@
             100% { transform: translate(0); }
         }
         
-        .status-indicator {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin-right: 5px;
-            display: inline-block;
-        }
-        
-        .status-online {
-            background-color: #4CAF50;
-        }
-        
-        .status-offline {
-            background-color: #F44336;
-        }
-        
         .toast {
             position: fixed;
             bottom: 30px;
@@ -370,6 +395,45 @@
         
         .toast.show {
             opacity: 1;
+        }
+        
+        /* PWA 설치 알림 배너 스타일 */
+        .install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #4a4a4a;
+            color: white;
+            padding: 15px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 99;
+        }
+        
+        .install-text {
+            flex: 1;
+            font-size: 14px;
+        }
+        
+        .install-btn {
+            background-color: white;
+            color: #4a4a4a;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+        
+        .install-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
         }
         
         @media (max-width: 380px) {
@@ -492,6 +556,13 @@
         </div>
     </div>
     
+    <!-- PWA 설치 알림 배너 -->
+    <div class="install-banner" id="installBanner">
+        <div class="install-text">홈 화면에 추가하여 앱처럼 사용하세요!</div>
+        <button class="install-btn" id="installBtn">설치</button>
+        <button class="install-close" id="installClose">×</button>
+    </div>
+    
     <div class="toast" id="toast"></div>
 
     <script>
@@ -506,6 +577,59 @@
             const storageStatus = document.getElementById('storageStatus');
             const storageStatusText = document.getElementById('storageStatusText');
             const toast = document.getElementById('toast');
+            const installBanner = document.getElementById('installBanner');
+            const installBtn = document.getElementById('installBtn');
+            const installClose = document.getElementById('installClose');
+            
+            // 서비스 워커 등록
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(registration => {
+                            console.log('서비스 워커 등록 성공:', registration.scope);
+                        })
+                        .catch(error => {
+                            console.error('서비스 워커 등록 실패:', error);
+                        });
+                });
+            }
+            
+            // PWA 설치 이벤트 처리
+            let deferredPrompt;
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // 기본 설치 프롬프트 표시 방지
+                e.preventDefault();
+                // 이벤트 저장
+                deferredPrompt = e;
+                // 설치 배너 표시
+                installBanner.style.display = 'flex';
+            });
+            
+            // 설치 버튼 클릭 이벤트
+            installBtn.addEventListener('click', () => {
+                // 배너 숨기기
+                installBanner.style.display = 'none';
+                // 설치 프롬프트 표시
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('사용자가 앱 설치를 수락했습니다');
+                            showToast('앱이 설치되었습니다');
+                        } else {
+                            console.log('사용자가 앱 설치를 거부했습니다');
+                        }
+                        deferredPrompt = null;
+                    });
+                }
+            });
+            
+            // 설치 배너 닫기 버튼
+            installClose.addEventListener('click', () => {
+                installBanner.style.display = 'none';
+            });
             
             // 스토리지 관리자 - IndexedDB, localStorage 또는 메모리 스토리지 사용
             const StorageManager = {
@@ -601,7 +725,7 @@
                     });
                 },
                 
-                // 데이터 저장하기
+// 데이터 저장하기
                 setItem: function(key, value) {
                     return new Promise((resolve) => {
                         // IndexedDB 사용
@@ -668,20 +792,6 @@
                     });
                 }
             };
-            
-            // 앱 초기화 함수
-            async function initApp() {
-                // 스토리지 초기화
-                await StorageManager.init();
-                
-                // 앱이 로드될 때 토스트 메시지 표시
-                setTimeout(() => {
-                    showToast('Darakwon Attendance 앱이 준비되었습니다', 3000);
-                }, 500);
-                
-                // 초기화 시 오래된 데이터 정리
-                cleanupOldData();
-            }
             
             // 토스트 메시지 표시 함수
             function showToast(message, duration = 2000) {
@@ -1051,6 +1161,26 @@
                 vibrate(this);
                 document.getElementById('restoreInput').click();
             });
+            
+            // 모바일 터치 이벤트 최적화
+            document.addEventListener('touchstart', function() {}, {passive: true});
+            
+            // 앱 초기화 함수
+            async function initApp() {
+                // 스토리지 초기화
+                await StorageManager.init();
+                
+                // 앱이 로드될 때 토스트 메시지 표시
+                setTimeout(() => {
+                    showToast('Darakwon Attendance 앱이 준비되었습니다', 3000);
+                }, 500);
+                
+                // 초기화 시 오래된 데이터 정리
+                cleanupOldData();
+            }
+            
+            // 앱 초기화
+            initApp();
         });
     </script>
 </body>
