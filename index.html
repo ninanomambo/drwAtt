@@ -1,179 +1,41 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="다락원 간편 출퇴근 기록 관리 앱">
-    <meta name="theme-color" content="#ffffff">
-    <meta property="og:title" content="다락원 간편 출퇴근 기록 관리 앱">
-    <meta property="og:description" content="다락원 간편 출퇴근 기록 관리 앱">
-    <meta property="og:image" content="/drwAtt/og_image.png">
-    <meta property="og:url" content="https://ninanomambo.github.io/drwAtt/">
-    
-    <title>다락원 간편 출퇴근 기록 관리 앱</title>
-    
-    <!-- PWA 설정 -->
-    <link rel="manifest" href="/drwAtt/manifest.json">
-    <link rel="icon" href="/drwAtt/icon.png">
-    <link rel="apple-touch-icon" href="/drwAtt/icon.png">
-    
-    <!-- iOS용 PWA 메타 태그 -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="다락원 출퇴근">
-    
-    <!-- CSS 파일 -->
-    <link rel="stylesheet" href="/drwAtt/css/style.css">
-    
-    <!-- GSAP 애니메이션 라이브러리 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="description" content="다락원 간편 출퇴근 기록 관리 앱" />
+  <link rel="manifest" href="/drwAtt/pwa-manifest.json">
+  <link rel="stylesheet" href="/drwAtt/style.css" />
+  <link rel="icon" href="/drwAtt/icon.png" />
+  <title>다락원 간편 출퇴근 기록 관리 앱</title>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Darakwon Attendance <span>Ver 0.1</span></h1>
-        </header>
-        
-        <main>
-            <div class="main-buttons">
-                <button id="checkInBtn" class="action-btn check-in">출근</button>
-                <button id="checkOutBtn" class="action-btn check-out">퇴근</button>
-            </div>
-            
-            <div class="sub-buttons">
-                <button id="attendanceBtn" class="sub-btn attendance">출근부</button>
-            </div>
-            
-            <div class="utility-buttons">
-                <button id="backupBtn" class="util-btn backup">백업</button>
-                <button id="restoreBtn" class="util-btn restore">복원</button>
-            </div>
-            
-            <div class="google-buttons">
-                <button id="googleLinkBtn" class="google-btn link">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
-                    Google 연동
-                </button>
-                <button id="googleBackupBtn" class="google-btn backup">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    Google 백업
-                </button>
-                <button id="googleRestoreBtn" class="google-btn restore">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Google 복원
-                </button>
-            </div>
-        </main>
-        
-        <!-- 출근부 레이어 -->
-        <div id="attendanceLayer" class="layer">
-            <div class="layer-content">
-                <div class="layer-header">
-                    <h2>출근부</h2>
-                    <button id="closeLayerBtn" class="close-btn">×</button>
-                </div>
-                <div class="layer-body">
-                    <div class="week-container current-week">
-                        <h3>■ 이번주</h3>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>날짜</th>
-                                        <th>요일</th>
-                                        <th>출근시간</th>
-                                        <th>퇴근시간</th>
-                                        <th>근무시간</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="currentWeekBody">
-                                    <!-- 여기에 동적으로 출근부 데이터가 채워집니다 -->
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="4">주중근무시간(월~금)</td>
-                                        <td id="currentWeekTotal">0시간</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div class="week-container last-week">
-                        <h3>■ 지난주</h3>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>날짜</th>
-                                        <th>요일</th>
-                                        <th>출근시간</th>
-                                        <th>퇴근시간</th>
-                                        <th>근무시간</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="lastWeekBody">
-                                    <!-- 여기에 동적으로 출근부 데이터가 채워집니다 -->
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td colspan="4">주중근무시간(월~금)</td>
-                                        <td id="lastWeekTotal">0시간</td>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Google 연동 레이어 -->
-        <div id="googleAuthLayer" class="layer">
-            <div class="layer-content">
-                <div class="layer-header">
-                    <h2>Google 드라이브 연동</h2>
-                    <button id="closeGoogleAuthBtn" class="close-btn">×</button>
-                </div>
-                <div class="layer-body">
-                    <form id="googleAuthForm">
-                        <div class="form-group">
-                            <label for="clientId">Client ID:</label>
-                            <input type="text" id="clientId" placeholder="Google API Client ID 입력">
-                        </div>
-                        <div class="form-group">
-                            <label for="apiKey">API Key:</label>
-                            <input type="text" id="apiKey" placeholder="Google API Key 입력">
-                        </div>
-                        <button type="submit" class="submit-btn">저장</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <!-- 토스트 메시지 -->
-        <div id="toast" class="toast"></div>
+  <div id="app">
+    <h1 class="title">Darakwon Attendance Ver 0.1</h1>
+    <div class="button-group">
+      <button id="check-in" class="btn btn-white">출근</button>
+      <button id="check-out" class="btn btn-dark">퇴근</button>
     </div>
-    
-    <!-- JavaScript 파일 -->
-    <script src="/drwAtt/js/db.js"></script>
-    <script src="/drwAtt/js/ui.js"></script>
-    <script src="/drwAtt/js/googleApi.js"></script>
-    <script src="/drwAtt/js/app.js"></script>
-    
-    <!-- PWA 서비스 워커 등록 -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/drwAtt/service-worker.js')
-                    .then(reg => {
-                        console.log('서비스 워커가 등록되었습니다:', reg.scope);
-                    })
-                    .catch(error => {
-                        console.log('서비스 워커 등록 실패:', error);
-                    });
-            });
-        }
-    </script>
+    <div class="sub-button">
+      <button id="view-log" class="btn btn-sub">출근부</button>
+    </div>
+    <div class="settings">
+      <button id="google-auth" title="Google 연동" class="icon-btn">🔐</button>
+      <button id="google-backup" title="Google 백업" class="icon-btn">💾</button>
+      <button id="google-restore" title="Google 복원" class="icon-btn">📂</button>
+    </div>
+    <div id="toast"></div>
+  </div>
+
+  <div id="log-layer" class="overlay hidden">
+    <div class="overlay-content">
+      <button id="close-log" class="close-btn">✕</button>
+      <div id="log-table"></div>
+    </div>
+  </div>
+
+  <script src="/drwAtt/db.js"></script>
+  <script src="/drwAtt/app.js"></script>
 </body>
 </html>
