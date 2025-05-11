@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ffffff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Darakwon Attendance">
+    <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAACXBIWXMAAAsTAAALEwEAmpwYAAABXUlEQVR4nO3YsQ3CMBRAFQZIED/JDrCW9IymyBrJAtQ0pGZGNB6g8Hu1jV0lX2VnNwMAAAAAAAAAAAAAAAAAgLHSO3OT12f1h3DImE5dEiABIgESIAESIAEyGgkQCRAJEPYnASIBIgHC/iRAvvI+VH8Bx/U6Vn8Bx7UMAyRAJEAkQNifBIgEiAQI+5MAmbd5rf4CDmtZ5uoPAAAAAAAAAAAAAAAAAAAAAAAAgKs6ve4f6fbGu92L1R7P/bWQAJEAkQBhfxIgEiASIOxPAkQCRAKE/UmASIBIgLA/CZDfa91UfwHHNXdd9QcAAAAAAAAAAAAAAAAAAAAAAABwUac/vmOd5y6p9niWkACRAJEAYX8SIBIgEiDsTwJEAkQChP1JgEiASICwPwmQj+m7+gs4rnnYqj8AAAAAAAAAAAAAAAAAAAAAAADgop7f6zqt6dQlARLw9+wkQCRAJEAkQEae3VT9AQAAAAAAAAAAAAAAAMDf9QKcuF9YlimGMgAAAABJRU5ErkJggg==">
+    <title>Darakwon Attendance Ver 0.1</title>
+    <title>Darakwon Attendance Ver 0.1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #f7f7f7;
+            height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+            position: fixed;
+        }
+        
+        .app-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px) env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
+            background-color: white;
+        }
+        
+        .app-header {
+            width: 100%;
+            padding: 20px 0;
+            border-bottom: 1px solid #f2f2f2;
+            margin-bottom: 30px;
+        }
+        
+        .app-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+        }
+        
+        .main-content {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-width: 500px;
+            padding: 0 20px;
+        }
+        
+        .main-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+        
+        .btn {
+            padding: 25px 10px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn:active {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+        
+        .btn-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .clock-in {
+            background-color: white;
+            color: #333;
+            border: 2px solid #e6e6e6;
+        }
+        
+        .clock-out {
+            background-color: #4a4a4a;
+            color: white;
+        }
+        
+        .attendance-btn-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .attendance-btn {
+            background-color: #f2f2f2;
+            color: #555;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            max-width: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .attendance-btn:active {
+            transform: scale(0.97);
+            background-color: #e8e8e8;
+        }
+        
+        .attendance-btn-icon {
+            margin-right: 8px;
+        }
+        
+        .data-management {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        .data-btn {
+            background-color: #f2f2f2;
+            color: #555;
+            padding: 10px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            max-width: 90px;
+        }
+        
+        .data-btn:active {
+            transform: scale(0.97);
+            background-color: #e8e8e8;
+        }
+        
+        .data-btn-icon {
+            margin-right: 5px;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .attendance-sheet {
+            background-color: white;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            border-radius: 15px;
+            padding: 20px;
+            overflow-y: auto;
+            margin: 20px auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            position: sticky;
+            top: 0;
+            background-color: white;
+            padding: 5px 0;
+            z-index: 5;
+        }
+        
+        .sheet-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sheet-title span {
+            margin-right: 8px;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #555;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .close-btn:active {
+            background-color: #f2f2f2;
+        }
+        
+        .week-section {
+            margin-bottom: 25px;
+        }
+        
+        .week-title {
+            background-color: #f2f2f2;
+            padding: 12px 15px;
+            font-weight: 600;
+            color: #333;
+            border-radius: 10px 10px 0 0;
+            text-align: left;
+        }
+        
+        .attendance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            table-layout: fixed;
+        }
+        
+        .attendance-table th {
+            background-color: #f7f7f7;
+            padding: 10px 5px;
+            text-align: center;
+            font-weight: 500;
+            color: #555;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        
+        .attendance-table td {
+            padding: 12px 5px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            color: #333;
+            font-size: 13px;
+            word-break: keep-all;
+            white-space: nowrap;
+        }
+        
+        .attendance-table th:first-child,
+        .attendance-table td:first-child {
+            width: 15%;
+        }
+        
+        .attendance-table th:nth-child(2),
+        .attendance-table td:nth-child(2) {
+            width: 20%;
+        }
+        
+        .attendance-table th:nth-child(3), 
+        .attendance-table th:nth-child(4),
+        .attendance-table td:nth-child(3), 
+        .attendance-table td:nth-child(4) {
+            width: 20%;
+        }
+        
+        .attendance-table th:last-child,
+        .attendance-table td:last-child {
+            width: 25%;
+        }
+        
+        .week-total {
+            text-align: right;
+            padding: 12px 15px;
+            font-weight: 600;
+            color: #333;
+            background-color: #f9f9f9;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        /* 모바일 최적화 추가 스타일 */
+        .vibrate {
+            animation: vibrate 0.3s linear;
+        }
+        
+        @keyframes vibrate {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        
+        .status-indicator {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            display: inline-block;
+        }
+        
+        .status-online {
+            background-color: #4CAF50;
+        }
+        
+        .status-offline {
+            background-color: #F44336;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            max-width: 80%;
+            text-align: center;
+            pointer-events: none;
+        }
+        
+        .toast.show {
+            opacity: 1;
+        }
+        
+        @media (max-width: 380px) {
+            .btn {
+                padding: 20px 10px;
+                font-size: 16px;
+            }
+            
+            .app-title {
+                font-size: 18px;
+            }
+            
+            .attendance-table {
+                font-size: 12px;
+            }
+            
+            .attendance-table th,
+            .attendance-table td {
+                padding: 8px 4px;
+            }
+            
+            .sheet-title {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="app-header">
+            <h1 class="app-title">Darakwon Attendance Ver 0.1</h1>
+        </div>
+        
+        <div class="main-content">
+            <div class="main-buttons">
+                <button class="btn clock-in" id="clockInBtn">
+                    <span class="btn-icon">⏰</span>
+                    출근
+                </button>
+                <button class="btn clock-out" id="clockOutBtn">
+                    <span class="btn-icon">🏠</span>
+                    퇴근
+                </button>
+            </div>
+            
+            <div class="attendance-btn-container">
+                <button class="attendance-btn" id="attendanceBtn">
+                    <span class="attendance-btn-icon">📋</span>
+                    출근부
+                </button>
+            </div>
+            
+            <div class="data-management">
+                <button class="data-btn" id="backupBtn">
+                    <span class="data-btn-icon">💾</span>
+                    백업
+                </button>
+                <button class="data-btn" id="restoreBtn">
+                    <span class="data-btn-icon">📂</span>
+                    복원
+                </button>
+                <input type="file" id="restoreInput" accept=".json" style="display: none;">
+            </div>
+            
+            <div class="status-indicator">
+                <span class="status-dot" id="storageStatus"></span>
+                <span id="storageStatusText">데이터 저장소: 확인 중...</span>
+            </div>
+            
+            <div class="current-time" id="currentTime"></div>
+        </div>
+    </div>
+    
+    <div class="overlay" id="overlay">
+        <div class="attendance-sheet">
+            <div class="sheet-header">
+                <div class="sheet-title">
+                    <span>📋</span> 근태 출근부
+                </div>
+                <button class="close-btn" id="closeBtn">×</button>
+            </div>
+            
+            <div class="week-section" id="currentWeek">
+                <div class="week-title">■ 이번주</div>
+                <table class="attendance-table" id="currentWeekTable">
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>요일</th>
+                            <th>출근</th>
+                            <th>퇴근</th>
+                            <th>근무시간</th>
+                        </tr>
+                    </thead>
+                    <tbody id="currentWeekBody">
+                        <!-- 이번주 데이터가 동적으로 채워집니다 -->
+                    </tbody>
+                </table>
+                <div class="week-total" id="currentWeekTotal">주중근무시간(월~금): 0시간</div>
+            </div>
+            
+            <div class="week-section" id="lastWeek">
+                <div class="week-title">■ 지난주</div>
+                <table class="attendance-table" id="lastWeekTable">
+                    <thead>
+                        <tr>
+                            <th>날짜</th>
+                            <th>요일</th>
+                            <th>출근</th>
+                            <th>퇴근</th>
+                            <th>근무시간</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lastWeekBody">
+                        <!-- 지난주 데이터가 동적으로 채워집니다 -->
+                    </tbody>
+                </table>
+                <div class="week-total" id="lastWeekTotal">주중근무시간(월~금): 0시간</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM 요소
+            const clockInBtn = document.getElementById('clockInBtn');
+            const clockOutBtn = document.getElementById('clockOutBtn');
+            const attendanceBtn = document.getElementById('attendanceBtn');
+            const overlay = document.getElementById('overlay');
+            const closeBtn = document.getElementById('closeBtn');
+            const currentTimeElem = document.getElementById('currentTime');
+            const storageStatus = document.getElementById('storageStatus');
+            const storageStatusText = document.getElementById('storageStatusText');
+            const toast = document.getElementById('toast');
+            
+            // 스토리지 관리자 - IndexedDB, localStorage 또는 메모리 스토리지 사용
+            const StorageManager = {
+                memoryStorage: {},
+                isIndexedDBAvailable: false,
+                isLocalStorageAvailable: false,
+                dbName: 'DarakwonAttendanceDB',
+                storeName: 'attendanceData',
+                db: null,
+                
+                // 스토리지 사용 가능 여부 확인 및 초기화
+                init: function() {
+                    return new Promise((resolve) => {
+                        // IndexedDB 사용 가능 여부 확인
+                        if ('indexedDB' in window) {
+                            const request = indexedDB.open(this.dbName, 1);
+                            
+                            request.onerror = () => {
+                                console.log('IndexedDB 사용 불가: 대체 방법 시도');
+                                this.tryLocalStorage();
+                                resolve();
+                            };
+                            
+                            request.onupgradeneeded = (event) => {
+                                const db = event.target.result;
+                                if (!db.objectStoreNames.contains(this.storeName)) {
+                                    db.createObjectStore(this.storeName);
+                                }
+                            };
+                            
+                            request.onsuccess = (event) => {
+                                this.db = event.target.result;
+                                this.isIndexedDBAvailable = true;
+                                storageStatus.classList.add('status-online');
+                                storageStatusText.textContent = '데이터 저장소: IndexedDB 사용 중 (영구 저장)';
+                                resolve();
+                            };
+                        } else {
+                            this.tryLocalStorage();
+                            resolve();
+                        }
+                    });
+                },
+                
+                // localStorage 사용 시도
+                tryLocalStorage: function() {
+                    try {
+                        localStorage.setItem('test', 'test');
+                        localStorage.removeItem('test');
+                        this.isLocalStorageAvailable = true;
+                        storageStatus.classList.add('status-online');
+                        storageStatusText.textContent = '데이터 저장소: 로컬 저장소 사용 중 (영구 저장)';
+                    } catch (e) {
+                        this.useMemoryStorage();
+                    }
+                },
+                
+                // 메모리 저장소 사용
+                useMemoryStorage: function() {
+                    this.isIndexedDBAvailable = false;
+                    this.isLocalStorageAvailable = false;
+                    storageStatus.classList.add('status-offline');
+                    storageStatusText.textContent = '데이터 저장소: 임시 메모리 사용 중 (앱 종료 시 데이터 삭제)';
+                    showToast('주의: 현재 임시 저장소를 사용 중입니다. 페이지를 닫으면 데이터가 삭제됩니다.', 5000);
+                },
+                
+                // 데이터 가져오기
+                getItem: function(key) {
+                    return new Promise((resolve) => {
+                        // IndexedDB 사용
+                        if (this.isIndexedDBAvailable) {
+                            const transaction = this.db.transaction([this.storeName], 'readonly');
+                            const store = transaction.objectStore(this.storeName);
+                            const request = store.get(key);
+                            
+                            request.onsuccess = () => {
+                                resolve(request.result);
+                            };
+                            
+                            request.onerror = () => {
+                                console.error('IndexedDB 데이터 읽기 오류');
+                                resolve(null);
+                            };
+                        } 
+                        // localStorage 사용
+                        else if (this.isLocalStorageAvailable) {
+                            resolve(localStorage.getItem(key));
+                        } 
+                        // 메모리 사용
+                        else {
+                            resolve(this.memoryStorage[key]);
+                        }
+                    });
+                },
+                
+                // 데이터 저장하기
+                setItem: function(key, value) {
+                    return new Promise((resolve) => {
+                        // IndexedDB 사용
+                        if (this.isIndexedDBAvailable) {
+                            const transaction = this.db.transaction([this.storeName], 'readwrite');
+                            const store = transaction.objectStore(this.storeName);
+                            const request = store.put(value, key);
+                            
+                            request.onsuccess = () => {
+                                resolve(true);
+                            };
+                            
+                            request.onerror = () => {
+                                console.error('IndexedDB 데이터 저장 오류');
+                                resolve(false);
+                            };
+                        } 
+                        // localStorage 사용
+                        else if (this.isLocalStorageAvailable) {
+                            try {
+                                localStorage.setItem(key, value);
+                                resolve(true);
+                            } catch (e) {
+                                console.error('localStorage 저장 오류', e);
+                                resolve(false);
+                            }
+                        } 
+                        // 메모리 사용
+                        else {
+                            this.memoryStorage[key] = value;
+                            resolve(true);
+                        }
+                    });
+                },
+                
+                // 데이터 삭제하기
+                removeItem: function(key) {
+                    return new Promise((resolve) => {
+                        // IndexedDB 사용
+                        if (this.isIndexedDBAvailable) {
+                            const transaction = this.db.transaction([this.storeName], 'readwrite');
+                            const store = transaction.objectStore(this.storeName);
+                            const request = store.delete(key);
+                            
+                            request.onsuccess = () => {
+                                resolve(true);
+                            };
+                            
+                            request.onerror = () => {
+                                console.error('IndexedDB 데이터 삭제 오류');
+                                resolve(false);
+                            };
+                        } 
+                        // localStorage 사용
+                        else if (this.isLocalStorageAvailable) {
+                            localStorage.removeItem(key);
+                            resolve(true);
+                        } 
+                        // 메모리 사용
+                        else {
+                            delete this.memoryStorage[key];
+                            resolve(true);
+                        }
+                    });
+                }
+            };
+            
+            // 앱 초기화 함수
+            async function initApp() {
+                // 스토리지 초기화
+                await StorageManager.init();
+                
+                // 앱이 로드될 때 토스트 메시지 표시
+                setTimeout(() => {
+                    showToast('Darakwon Attendance 앱이 준비되었습니다', 3000);
+                }, 500);
+                
+                // 초기화 시 오래된 데이터 정리
+                cleanupOldData();
+            }
+            
+            // 토스트 메시지 표시 함수
+            function showToast(message, duration = 2000) {
+                toast.textContent = message;
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, duration);
+            }
+            
+            // 진동 효과 함수 (모바일)
+            function vibrate(element) {
+                element.classList.add('vibrate');
+                setTimeout(() => {
+                    element.classList.remove('vibrate');
+                }, 300);
+                
+                // 모바일 기기 진동 API (지원되는 경우)
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(100);
+                }
+            }
+            
+            // 현재 시간 업데이트 함수
+            function updateCurrentTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                currentTimeElem.textContent = `현재 시간: ${hours}:${minutes}:${seconds}`;
+            }
+            
+            // 1초마다 현재 시간 업데이트
+            setInterval(updateCurrentTime, 1000);
+            updateCurrentTime();
+            
+            // 날짜 형식 변환 함수
+            function formatDate(date) {
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                
+                return `${month}월-${day}일 ${hours}:${minutes}`;
+            }
+            
+            // 요일 구하기 함수
+            function getDayOfWeek(date) {
+                const days = ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'];
+                return days[date.getDay()];
+            }
+            
+            // 날짜로부터 주 시작일 구하기 (일요일 기준)
+            function getWeekStart(date) {
+                const d = new Date(date);
+                const day = d.getDay(); // 0 = 일요일, 1 = 월요일, ...
+                d.setDate(d.getDate() - day); // 이번 주 일요일로 설정
+                d.setHours(0, 0, 0, 0); // 자정으로 설정
+                return d;
+            }
+            
+            // IndexedDB 또는 다른 저장소에서 출퇴근 데이터 가져오기
+            async function getAttendanceData() {
+                const data = await StorageManager.getItem('attendanceData');
+                return data ? JSON.parse(data) : {};
+            }
+            
+            // 출퇴근 데이터 저장
+            async function saveAttendanceData(data) {
+                await StorageManager.setItem('attendanceData', JSON.stringify(data));
+            }
+            
+            // 출근 버튼 클릭 이벤트
+            clockInBtn.addEventListener('click', async function() {
+                vibrate(this);
+                const now = new Date();
+                const dateKey = now.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+                const attendanceData = await getAttendanceData();
+                
+                // 이미 출근 기록이 있으면 업데이트하지 않음
+                if (!attendanceData[dateKey] || !attendanceData[dateKey].clockIn) {
+                    attendanceData[dateKey] = attendanceData[dateKey] || {};
+                    attendanceData[dateKey].clockIn = now.getTime();
+                    await saveAttendanceData(attendanceData);
+                    
+                    showToast('출근 시간이 기록되었습니다: ' + formatDate(now));
+                } else {
+                    showToast('이미 출근 기록이 있습니다: ' + formatDate(new Date(attendanceData[dateKey].clockIn)));
+                }
+                
+                // 2주가 지난 데이터 삭제
+                await cleanupOldData();
+            });
+            
+            // 퇴근 버튼 클릭 이벤트
+            clockOutBtn.addEventListener('click', async function() {
+                vibrate(this);
+                const now = new Date();
+                const dateKey = now.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+                const attendanceData = await getAttendanceData();
+                
+                if (!attendanceData[dateKey]) {
+                    showToast('오늘 출근 기록이 없습니다. 먼저 출근을 등록해주세요.');
+                    return;
+                }
+                
+                // 퇴근 시간은 항상 업데이트
+                attendanceData[dateKey].clockOut = now.getTime();
+                await saveAttendanceData(attendanceData);
+                
+                showToast('퇴근 시간이 기록되었습니다: ' + formatDate(now));
+                
+                // 2주가 지난 데이터 삭제
+                await cleanupOldData();
+            });
+            
+            // 2주 이상 지난 데이터 삭제
+            async function cleanupOldData() {
+                const attendanceData = await getAttendanceData();
+                const twoWeeksAgo = new Date();
+                twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+                twoWeeksAgo.setHours(0, 0, 0, 0);
+                
+                let hasChanges = false;
+                
+                for (const dateKey in attendanceData) {
+                    const recordDate = new Date(dateKey);
+                    if (recordDate < twoWeeksAgo) {
+                        delete attendanceData[dateKey];
+                        hasChanges = true;
+                    }
+                }
+                
+                if (hasChanges) {
+                    await saveAttendanceData(attendanceData);
+                }
+            }
+            
+            // 근무 시간 계산 (점심 시간 제외, 11시간 초과 시 저녁 시간 제외)
+            function calculateWorkHours(clockIn, clockOut) {
+                if (!clockIn || !clockOut) return 0;
+                
+                const inTime = new Date(clockIn);
+                const outTime = new Date(clockOut);
+                
+                // 총 근무 시간 (밀리초)
+                let totalMs = outTime - inTime;
+                
+                // 점심 시간 계산 (11:30 ~ 12:00)
+                const inDate = new Date(inTime);
+                const lunchStart = new Date(inDate.setHours(11, 30, 0, 0));
+                const lunchEnd = new Date(inDate.setHours(12, 0, 0, 0));
+                
+                // 점심 시간이 근무 시간에 포함되어 있는지 확인
+                if (inTime <= lunchEnd && outTime >= lunchStart) {
+                    // 점심 시간의 겹치는 부분 계산
+                    const lunchOverlapStart = Math.max(inTime.getTime(), lunchStart.getTime());
+                    const lunchOverlapEnd = Math.min(outTime.getTime(), lunchEnd.getTime());
+                    const lunchOverlapMs = lunchOverlapEnd - lunchOverlapStart;
+                    
+                    // 겹치는 점심 시간 제외
+                    totalMs -= lunchOverlapMs;
+                }
+                
+                // 11시간 초과 근무인 경우 저녁 시간 1시간 제외
+                const elevenHoursMs = 11 * 60 * 60 * 1000;
+                if (totalMs > elevenHoursMs) {
+                    totalMs -= 60 * 60 * 1000; // 1시간 (60분 * 60초 * 1000밀리초)
+                }
+                
+                // 시간으로 변환 (밀리초 -> 시간)
+                const hours = Math.max(0, totalMs / (1000 * 60 * 60));
+                return hours;
+            }
+            
+            // 출근부 버튼 클릭 이벤트
+            attendanceBtn.addEventListener('click', async function() {
+                vibrate(this);
+                await renderAttendanceSheet();
+                overlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden'; // 배경 스크롤 방지
+            });
+            
+            // 닫기 버튼 이벤트
+            closeBtn.addEventListener('click', function() {
+                overlay.style.display = 'none';
+                document.body.style.overflow = ''; // 스크롤 복원
+            });
+            
+            // 배경 클릭 시 출근부 닫기
+            overlay.addEventListener('click', function(e) {
+                if (e.target === overlay) {
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = ''; // 스크롤 복원
+                }
+            });
+            
+            // 터치 이벤트 취소 (스와이프 방지)
+            overlay.addEventListener('touchmove', function(e) {
+                e.stopPropagation();
+            }, { passive: false });
+            
+            // 출근부 렌더링
+            async function renderAttendanceSheet() {
+                try {
+                    const attendanceData = await getAttendanceData();
+                    const today = new Date();
+                    
+                    // 이번 주 시작일 (일요일)
+                    const currentWeekStart = getWeekStart(today);
+                    
+                    // 지난 주 시작일 (이번주 시작일 - 7일)
+                    const lastWeekStart = new Date(currentWeekStart);
+                    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+                    
+                    // 이번 주 데이터 렌더링
+                    renderWeekData(currentWeekStart, 'currentWeekBody', 'currentWeekTotal', attendanceData);
+                    
+                    // 지난 주 데이터 렌더링
+                    renderWeekData(lastWeekStart, 'lastWeekBody', 'lastWeekTotal', attendanceData);
+                } catch (error) {
+                    console.error('출근부 렌더링 오류:', error);
+                    showToast('출근부 데이터를 불러오는 중 오류가 발생했습니다');
+                }
+            }
+            
+            // 주간 데이터 렌더링
+            function renderWeekData(weekStart, tableBodyId, totalId, attendanceData) {
+                const tableBody = document.getElementById(tableBodyId);
+                tableBody.innerHTML = '';
+                
+                let weekdayTotalHours = 0; // 주중(월~금) 총 근무 시간
+                
+                // 해당 주의 7일 데이터 렌더링
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(weekStart);
+                    date.setDate(date.getDate() + i);
+                    
+                    const dateKey = date.toISOString().split('T')[0];
+                    const dayRecord = attendanceData[dateKey] || {};
+                    
+                    const row = document.createElement('tr');
+                    
+                    // 날짜
+                    const dateCell = document.createElement('td');
+                    dateCell.textContent = `${date.getDate()}일`;
+                    row.appendChild(dateCell);
+                    
+                    // 요일
+                    const dayCell = document.createElement('td');
+                    const dayOfWeek = getDayOfWeek(date);
+                    dayCell.textContent = dayOfWeek;
+                    row.appendChild(dayCell);
+                    
+                    // 출근 시간
+                    const clockInCell = document.createElement('td');
+                    if (dayRecord.clockIn) {
+                        const clockInDate = new Date(dayRecord.clockIn);
+                        clockInCell.textContent = `${String(clockInDate.getHours()).padStart(2, '0')}:${String(clockInDate.getMinutes()).padStart(2, '0')}`;
+                    } else {
+                        clockInCell.textContent = '-';
+                    }
+                    row.appendChild(clockInCell);
+                    
+                    // 퇴근 시간
+                    const clockOutCell = document.createElement('td');
+                    if (dayRecord.clockOut) {
+                        const clockOutDate = new Date(dayRecord.clockOut);
+                        clockOutCell.textContent = `${String(clockOutDate.getHours()).padStart(2, '0')}:${String(clockOutDate.getMinutes()).padStart(2, '0')}`;
+                    } else {
+                        clockOutCell.textContent = '-';
+                    }
+                    row.appendChild(clockOutCell);
+                    
+                    // 근무 시간
+                    const workHoursCell = document.createElement('td');
+                    const workHours = calculateWorkHours(dayRecord.clockIn, dayRecord.clockOut);
+                    
+                    if (workHours > 0) {
+                        workHoursCell.textContent = `${workHours.toFixed(1)}시간`;
+                        
+                        // 평일(월~금)인 경우에만 총 근무 시간에 추가
+                        const day = date.getDay();
+                        if (day >= 1 && day <= 5) { // 1=월요일, 5=금요일
+                            weekdayTotalHours += workHours;
+                        }
+                    } else {
+                        workHoursCell.textContent = '-';
+                    }
+                    row.appendChild(workHoursCell);
+                    
+                    tableBody.appendChild(row);
+                }
+                
+                // 주중 총 근무 시간 업데이트
+                document.getElementById(totalId).textContent = `주중근무시간(월~금): ${weekdayTotalHours.toFixed(1)}시간`;
+            }
+            
+            // 데이터 내보내기 - 백업 기능
+            function exportData() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        const data = await getAttendanceData();
+                        const dataStr = JSON.stringify(data);
+                        const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+                        
+                        // 파일 다운로드
+                        const exportFileDefaultName = 'darakwon-attendance-backup.json';
+                        const linkElement = document.createElement('a');
+                        linkElement.setAttribute('href', dataUri);
+                        linkElement.setAttribute('download', exportFileDefaultName);
+                        linkElement.click();
+                        resolve(true);
+                    } catch (error) {
+                        console.error("데이터 내보내기 실패:", error);
+                        reject(error);
+                    }
+                });
+            }
+            
+            // 데이터 가져오기 - 복원 기능
+            function importData(jsonData) {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        const data = JSON.parse(jsonData);
+                        await saveAttendanceData(data);
+                        await renderAttendanceSheet();
+                        resolve(true);
+                    } catch (error) {
+                        console.error("데이터 가져오기 실패:", error);
+                        reject(error);
+                    }
+                });
+            }
+            
+            // 데이터 백업 버튼 이벤트
+            document.getElementById('backupBtn').addEventListener('click', async function() {
+                vibrate(this);
+                try {
+                    await exportData();
+                    showToast('백업 파일이 다운로드되었습니다');
+                } catch (error) {
+                    showToast('백업 생성 중 오류가 발생했습니다');
+                }
+            });
+            
+            // 데이터 복원 파일 선택 이벤트
+            document.getElementById('restoreInput').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = async function(e) {
+                    try {
+                        await importData(e.target.result);
+                        showToast('데이터가 성공적으로 복원되었습니다');
+                    } catch (error) {
+                        showToast('데이터 복원 중 오류가 발생했습니다');
+                    }
+                };
+                reader.readAsText(file);
+            });
+            
+            // 복원 버튼 클릭 시 파일 선택 다이얼로그 열기
+            document.getElementById('restoreBtn').addEventListener('click', function() {
+                vibrate(this);
+                document.getElementById('restoreInput').click();
+            });
+        });
+    </script>
+</body>
+</html>
