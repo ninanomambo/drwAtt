@@ -1319,11 +1319,25 @@
                 await StorageManager.setItem('attendanceData', JSON.stringify(data));
             }
             
-            // 출근 버튼 클릭 이벤트
+
+            // 출근 버튼 클릭 이벤트 수정
             clockInBtn.addEventListener('click', async function() {
                 vibrate(this);
+                
+                // 현재 날짜와 시간 가져오기
                 const now = new Date();
-                const dateKey = now.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+                
+                // ISO 형식의 현재 날짜를 YYYY-MM-DD 형태로 변환
+                // toISOString()은 UTC 기준으로 변환되므로 로컬 날짜를 사용하도록 수정
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const dateKey = `${year}-${month}-${day}`;
+                
+                // 로그 추가 (디버깅용, 실제 사용시 제거 가능)
+                console.log('현재 날짜 키:', dateKey);
+                console.log('현재 시간:', now.toLocaleString());
+                
                 const attendanceData = await getAttendanceData();
                 
                 // 이미 출근 기록이 있으면 업데이트하지 않음
@@ -1340,12 +1354,25 @@
                 // 2주가 지난 데이터 삭제
                 await cleanupOldData();
             });
-            
-            // 퇴근 버튼 클릭 이벤트
+
+            // 퇴근 버튼 클릭 이벤트 수정
             clockOutBtn.addEventListener('click', async function() {
                 vibrate(this);
+                
+                // 현재 날짜와 시간 가져오기
                 const now = new Date();
-                const dateKey = now.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+                
+                // ISO 형식의 현재 날짜를 YYYY-MM-DD 형태로 변환
+                // toISOString()은 UTC 기준으로 변환되므로 로컬 날짜를 사용하도록 수정
+                const year = now.getFullYear();
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const dateKey = `${year}-${month}-${day}`;
+                
+                // 로그 추가 (디버깅용, 실제 사용시 제거 가능)
+                console.log('현재 날짜 키:', dateKey);
+                console.log('현재 시간:', now.toLocaleString());
+                
                 const attendanceData = await getAttendanceData();
                 
                 if (!attendanceData[dateKey]) {
@@ -1363,7 +1390,16 @@
                 await cleanupOldData();
             });
             
-            // 2주 이상 지난 데이터 삭제
+            // 날짜 키 생성 함수 (재사용을 위해 별도 함수로 분리 - 선택사항)
+            function getDateKey(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+
+            // 2주 이상 지난 데이터 삭제 함수도 동일한 방식으로 수정
             async function cleanupOldData() {
                 const attendanceData = await getAttendanceData();
                 const twoWeeksAgo = new Date();
@@ -1373,7 +1409,10 @@
                 let hasChanges = false;
                 
                 for (const dateKey in attendanceData) {
-                    const recordDate = new Date(dateKey);
+                    // 날짜 문자열 파싱 시 로컬 시간대로 변환
+                    const [year, month, day] = dateKey.split('-').map(num => parseInt(num, 10));
+                    const recordDate = new Date(year, month - 1, day);  // month는 0부터 시작하므로 -1 처리
+                    
                     if (recordDate < twoWeeksAgo) {
                         delete attendanceData[dateKey];
                         hasChanges = true;
@@ -1383,7 +1422,6 @@
                 if (hasChanges) {
                     await saveAttendanceData(attendanceData);
                 }
-            }
             
             // 근무 시간 계산 (점심 시간 제외, 11시간 초과 시 저녁 시간 제외)
             function calculateWorkHours(clockIn, clockOut) {
